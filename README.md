@@ -127,6 +127,6 @@ claude mcp add vibops vibops-mcp \
 
 ## License
 
-Apache 2.0 — free to use, modify, and distribute. See [LICENSE](LICENSE).
+MIT — free to use, modify, and distribute. See [LICENSE](LICENSE).
 
 Built on [FastMCP](https://github.com/anthropics/mcp) and the [VibOps](https://vibops.io) platform.
