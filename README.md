@@ -1,10 +1,14 @@
 # vibops-mcp
 
-Control your GPU infrastructure with Claude, Cursor, or any MCP-compatible AI assistant.
+The provider-agnostic MCP server for GPU infrastructure — one interface for any cloud, any cluster, any provider.
 
-## What it does
+## The problem
 
-`vibops-mcp` exposes 26 tools that let an AI assistant:
+Large enterprises and CSPs managing GPU infrastructure deal with fragmentation — AWS, GCP, Azure, on-prem, neoclouds, each with their own API, dashboard, and cost model. Correlating utilisation, cost, and workload type across providers requires jumping between 5 tools.
+
+## The solution
+
+`vibops-mcp` is a single MCP server that abstracts this complexity. One `pip install`, 26 tools, and your AI assistant can observe, operate, and optimize your entire GPU fleet — regardless of where it runs.
 
 - **Observe** — GPU utilisation, workload breakdown, MTTR, cost estimates, live K8s deployments
 - **Act** — deploy models, scale clusters, run Helm/kubectl, trigger pipelines
@@ -125,8 +129,31 @@ claude mcp add vibops vibops-mcp \
 "What's our MTTR for critical alerts?"
 ```
 
+## Roadmap
+
+### Wave 1 — Current (v0.1)
+- ✅ Kubernetes (generic — on-prem, Kind, kubeadm)
+- ✅ Any VibOps-connected cluster via gateway
+
+### Wave 2 — Q2 2026
+- 🔜 NVIDIA DGX Cloud (NGC API)
+- 🔜 AWS (EC2 GPU + EKS)
+- 🔜 GCP (A3/A2 + GKE)
+- 🔜 Azure (ND/NC series + AKS)
+
+### Wave 3 — Q3 2026
+- 🔜 CoreWeave, Lambda Labs, RunPod
+- 🔜 OVHcloud, Scaleway
+- 🔜 Dell APEX, HPE GreenLake
+
+Want a provider prioritised? [Open an issue](https://github.com/VibOpsai/vibops-mcp/issues/new).
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). All contributions require a DCO sign-off (`git commit -s`).
+
 ## License
 
 MIT — free to use, modify, and distribute. See [LICENSE](LICENSE).
 
-Built on [FastMCP](https://github.com/anthropics/mcp) and the [VibOps](https://vibops.io) platform.
+Built on [FastMCP](https://github.com/jlowin/fastmcp) and the [VibOps](https://vibops.io) platform.

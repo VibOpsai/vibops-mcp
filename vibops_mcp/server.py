@@ -194,16 +194,22 @@ async def list_kubectl_contexts() -> dict:
 # ── Action tools (8) ──────────────────────────────────────────────────────────
 
 @mcp.tool()
-async def scale_cluster(cluster_name: str, replicas: int, namespace: str | None = None) -> dict:
+async def scale_cluster(
+    cluster_name: str,
+    replicas: int,
+    deployment_name: str | None = None,
+    namespace: str | None = None,
+) -> dict:
     """
-    Scale a Kubernetes deployment or node pool.
+    Scale a Kubernetes deployment.
 
     Args:
         cluster_name: Target cluster name.
         replicas: Desired replica count.
-        namespace: Kubernetes namespace (optional).
+        deployment_name: Name of the deployment to scale (e.g. llama3, ollama).
+        namespace: Kubernetes namespace (optional, defaults to 'default').
     """
-    return await actions.scale_cluster(cluster_name, replicas, namespace)
+    return await actions.scale_cluster(cluster_name, replicas, deployment_name, namespace)
 
 
 @mcp.tool()

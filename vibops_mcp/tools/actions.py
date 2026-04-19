@@ -7,21 +7,46 @@ All operations are recorded in the audit log.
 from vibops_mcp import client
 
 
+import asyncio
+
+
 async def _run_job(action: str, payload: dict) -> dict:
     """Submit a job and return its initial state (async — poll with get_job)."""
     return await client.post("/api/v1/jobs", body={"action": action, "payload": payload})
 
 
-async def scale_cluster(cluster_name: str, replicas: int, namespace: str | None = None) -> dict:
+async def _run_job_sync(action: str, payload: dict, timeout: int = 30) -> dict:
+    """Submit a job and poll until completion (up to timeout seconds)."""
+    job = await _run_job(action, payload)
+    job_id = job.get("id")
+    if not job_id:
+        return job
+    for _ in range(timeout // 2):
+        await asyncio.sleep(2)
+        result = await client.get(f"/api/v1/jobs/{job_id}")
+        if result.get("status") in ("success", "failed"):
+            return result
+    return job
+
+
+async def scale_cluster(
+    cluster_name: str,
+    replicas: int,
+    deployment_name: str | None = None,
+    namespace: str | None = None,
+) -> dict:
     """
-    Scale a Kubernetes deployment or node pool.
+    Scale a Kubernetes deployment.
 
     Args:
         cluster_name: Target cluster name.
         replicas: Desired replica count.
+        deployment_name: Name of the deployment to scale (e.g. llama3, ollama).
         namespace: Kubernetes namespace (optional, defaults to 'default').
     """
     payload: dict = {"cluster": cluster_name, "replicas": replicas}
+    if deployment_name:
+        payload["name"] = deployment_name
     if namespace:
         payload["namespace"] = namespace
     return await _run_job("scale_cluster", payload)
@@ -110,7 +135,7 @@ async def run_kubectl(cluster_name: str, command: list[str]) -> dict:
         cluster_name: Target cluster.
         command: kubectl arguments as a list.
     """
-    return await _run_job("kubectl_exec", {
+    return await _run_job_sync("kubectl_exec", {
         "cluster": cluster_name,
         "command": command,
     })
