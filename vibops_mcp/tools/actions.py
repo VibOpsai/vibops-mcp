@@ -100,7 +100,7 @@ async def helm_upgrade(
     """
     payload: dict = {
         "cluster": cluster_name,
-        "release": release_name,
+        "name": release_name,
         "chart": chart,
         "namespace": namespace,
     }
@@ -120,7 +120,7 @@ async def helm_uninstall(cluster_name: str, release_name: str, namespace: str = 
     """
     return await _run_job("helm_uninstall", {
         "cluster": cluster_name,
-        "release": release_name,
+        "name": release_name,
         "namespace": namespace,
     })
 
@@ -150,7 +150,7 @@ async def git_clone(repo_url: str, branch: str = "main", cluster_name: str | Non
         branch: Branch to clone (default: main).
         cluster_name: Target cluster if repo contains K8s manifests to apply.
     """
-    payload: dict = {"repo": repo_url, "branch": branch}
+    payload: dict = {"repo_url": repo_url, "branch": branch}
     if cluster_name:
         payload["cluster"] = cluster_name
     return await _run_job("git_clone", payload)

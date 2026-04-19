@@ -57,4 +57,6 @@ async def delete(path: str) -> dict:
     async with _client() as c:
         r = await c.delete(path)
         r.raise_for_status()
+        if r.status_code == 204 or not r.content:
+            return {"deleted": True}
         return r.json()
