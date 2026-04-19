@@ -55,7 +55,11 @@ async def get_job(job_id: str) -> dict:
     Args:
         job_id: UUID of the job.
     """
-    return await client.get(f"/api/v1/jobs/{job_id}")
+    job = await client.get(f"/api/v1/jobs/{job_id}")
+    # Truncate logs to avoid token overflow (helm/kubectl output can be hundreds of KB)
+    if job.get("logs") and len(job["logs"]) > 1000:
+        job["logs"] = job["logs"][:1000] + f" ... [{len(job['logs']) - 1000} chars truncated]"
+    return job
 
 
 async def get_gpu_metrics(hours: int = 24) -> dict:
