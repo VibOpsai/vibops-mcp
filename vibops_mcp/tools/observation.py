@@ -138,9 +138,14 @@ async def list_providers() -> dict:
     return await client.get("/api/v1/providers")
 
 
-async def list_pipelines() -> dict:
-    """List automation pipelines (sequences of jobs)."""
-    return await client.get("/api/v1/pipelines")
+async def list_pipelines(limit: int = 10) -> dict:
+    """
+    List automation pipelines (sequences of jobs).
+
+    Args:
+        limit: Maximum number of pipelines to return (default: 10, max: 200).
+    """
+    return await client.get("/api/v1/pipelines", params={"limit": limit})
 
 
 async def get_cluster_rate(cluster_name: str) -> dict:

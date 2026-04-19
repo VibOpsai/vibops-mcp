@@ -169,9 +169,14 @@ async def list_providers() -> dict:
 
 
 @mcp.tool()
-async def list_pipelines() -> dict:
-    """List automation pipelines (sequences of jobs)."""
-    return await observation.list_pipelines()
+async def list_pipelines(limit: int = 10) -> dict:
+    """
+    List automation pipelines (sequences of jobs).
+
+    Args:
+        limit: Maximum number of pipelines to return (default: 10, max: 200).
+    """
+    return await observation.list_pipelines(limit=limit)
 
 
 @mcp.tool()
