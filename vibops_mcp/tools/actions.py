@@ -103,6 +103,7 @@ async def helm_upgrade(
         "name": release_name,
         "chart": chart,
         "namespace": namespace,
+        "wait": False,
     }
     if values:
         payload["values"] = values
@@ -118,11 +119,11 @@ async def helm_uninstall(cluster_name: str, release_name: str, namespace: str = 
         release_name: Helm release to remove.
         namespace: Kubernetes namespace (default: 'default').
     """
-    return await _run_job("helm_uninstall", {
+    return await _run_job_sync("helm_uninstall", {
         "cluster": cluster_name,
         "name": release_name,
         "namespace": namespace,
-    })
+    }, timeout=30)
 
 
 async def run_kubectl(cluster_name: str, command: list[str]) -> dict:
