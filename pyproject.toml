@@ -33,8 +33,8 @@ vibops-mcp = "vibops_mcp.server:main"
 
 [project.urls]
 Homepage = "https://vibops.io"
-Repository = "https://github.com/vibops/vibops-mcp"
-Issues = "https://github.com/vibops/vibops-mcp/issues"
+Repository = "https://github.com/VibOpsai/vibops-mcp"
+Issues = "https://github.com/VibOpsai/vibops-mcp/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["vibops_mcp"]

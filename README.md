@@ -19,7 +19,7 @@ All operations go through your VibOps instance and are recorded in the audit log
 ## Installation
 
 ```bash
-pip install vibops-mcp
+pip install git+https://github.com/VibOpsai/vibops-mcp.git
 ```
 
 ## Configuration
