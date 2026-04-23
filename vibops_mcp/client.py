@@ -5,10 +5,14 @@ Configuration (env vars):
   VIBOPS_URL    — base URL of your VibOps instance, e.g. https://vibops.example.com
   VIBOPS_TOKEN  — API token (create one in VibOps → Settings → API Tokens)
 """
+import asyncio
 import os
 import httpx
 
 _TIMEOUT = 60.0
+_RETRY_STATUSES = {502, 503, 504}
+_MAX_RETRIES = 3
+_RETRY_BACKOFF = 1.0  # seconds, doubled on each attempt
 
 
 def _base_url() -> str:
@@ -42,24 +46,30 @@ def _client() -> httpx.AsyncClient:
     )
 
 
+async def _request(method: str, path: str, **kwargs) -> dict:
+    """Execute an HTTP request with exponential backoff retry on transient errors."""
+    delay = _RETRY_BACKOFF
+    for attempt in range(_MAX_RETRIES):
+        async with _client() as c:
+            r = await c.request(method, path, **kwargs)
+        if r.status_code not in _RETRY_STATUSES or attempt == _MAX_RETRIES - 1:
+            r.raise_for_status()
+            if r.status_code == 204 or not r.content:
+                return {"deleted": True}
+            return r.json()
+        await asyncio.sleep(delay)
+        delay *= 2
+    # unreachable — loop always returns or raises
+    raise RuntimeError("retry loop exhausted")  # pragma: no cover
+
+
 async def get(path: str, params: dict | None = None) -> dict:
-    async with _client() as c:
-        r = await c.get(path, params=params)
-        r.raise_for_status()
-        return r.json()
+    return await _request("GET", path, params=params)
 
 
 async def post(path: str, body: dict | None = None) -> dict:
-    async with _client() as c:
-        r = await c.post(path, json=body or {})
-        r.raise_for_status()
-        return r.json()
+    return await _request("POST", path, json=body or {})
 
 
 async def delete(path: str) -> dict:
-    async with _client() as c:
-        r = await c.delete(path)
-        r.raise_for_status()
-        if r.status_code == 204 or not r.content:
-            return {"deleted": True}
-        return r.json()
+    return await _request("DELETE", path)

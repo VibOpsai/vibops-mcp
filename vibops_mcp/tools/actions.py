@@ -16,7 +16,11 @@ async def _run_job(action: str, payload: dict) -> dict:
 
 
 async def _run_job_sync(action: str, payload: dict, timeout: int = 30) -> dict:
-    """Submit a job and poll until completion (up to timeout seconds)."""
+    """Submit a job and poll until completion (up to timeout seconds).
+
+    Returns the job dict. If the job does not reach a terminal state within
+    `timeout` seconds, returns the last observed state with `timed_out: true`.
+    """
     job = await _run_job(action, payload)
     job_id = job.get("id")
     if not job_id:
@@ -26,7 +30,12 @@ async def _run_job_sync(action: str, payload: dict, timeout: int = 30) -> dict:
         result = await client.get(f"/api/v1/jobs/{job_id}")
         if result.get("status") in ("success", "failed"):
             return result
-    return job
+    result["timed_out"] = True
+    result["message"] = (
+        f"Job {job_id} did not complete within {timeout}s. "
+        "Use get_job to check its current status."
+    )
+    return result
 
 
 async def scale_cluster(
