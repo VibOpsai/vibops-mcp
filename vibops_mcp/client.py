@@ -34,7 +34,10 @@ def _token() -> str:
 def _client() -> httpx.AsyncClient:
     return httpx.AsyncClient(
         base_url=_base_url(),
-        headers={"Authorization": f"Bearer {_token()}"},
+        headers={
+            "Authorization": f"Bearer {_token()}",
+            "X-VibOps-Source": "mcp",
+        },
         timeout=_TIMEOUT,
     )
 

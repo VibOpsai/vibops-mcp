@@ -9,7 +9,7 @@ from vibops_mcp import client
 
 async def list_clusters() -> dict:
     """List all Kubernetes clusters and their GPU utilisation."""
-    return await client.get("/api/v1/gateways")
+    return await client.get("/api/v1/clusters")
 
 
 async def get_cluster_deployments(cluster_name: str, namespace: str | None = None) -> dict:
