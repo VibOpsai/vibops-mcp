@@ -15,7 +15,7 @@ async def list_clusters() -> dict:
     fleet status. For raw kubeconfig contexts (including clusters not yet registered
     in VibOps), use list_kubectl_contexts instead.
     """
-    return await client.get("/api/v1/gateways")
+    return await client.get("/api/v1/clusters")
 
 
 async def get_cluster_deployments(cluster_name: str, namespace: str | None = None) -> dict:
