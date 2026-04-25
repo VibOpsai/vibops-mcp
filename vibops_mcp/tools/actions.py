@@ -10,18 +10,21 @@ from vibops_mcp import client
 import asyncio
 
 
-async def _run_job(action: str, payload: dict) -> dict:
+async def _run_job(action: str, payload: dict, gateway_id: str | None = None) -> dict:
     """Submit a job and return its initial state (async — poll with get_job)."""
-    return await client.post("/api/v1/jobs", body={"action": action, "payload": payload})
+    body: dict = {"action": action, "payload": payload}
+    if gateway_id:
+        body["gateway_id"] = gateway_id
+    return await client.post("/api/v1/jobs", body=body)
 
 
-async def _run_job_sync(action: str, payload: dict, timeout: int = 30) -> dict:
+async def _run_job_sync(action: str, payload: dict, timeout: int = 30, gateway_id: str | None = None) -> dict:
     """Submit a job and poll until completion (up to timeout seconds).
 
     Returns the job dict. If the job does not reach a terminal state within
     `timeout` seconds, returns the last observed state with `timed_out: true`.
     """
-    job = await _run_job(action, payload)
+    job = await _run_job(action, payload, gateway_id=gateway_id)
     job_id = job.get("id")
     if not job_id:
         return job
@@ -43,6 +46,7 @@ async def scale_deployment(
     deployment_name: str,
     replicas: int,
     namespace: str = "default",
+    gateway_id: str | None = None,
 ) -> dict:
     """
     Scale the replica count of a Kubernetes deployment.
@@ -57,6 +61,8 @@ async def scale_deployment(
         deployment_name: Name of the deployment to scale (e.g. llama3, ollama).
         replicas: Desired number of running pods (0 to suspend).
         namespace: Kubernetes namespace (default: 'default').
+        gateway_id: Gateway UUID from list_clusters. Omit for single-gateway deployments;
+                    provide to disambiguate when multiple gateways share a cluster name.
     """
     payload: dict = {
         "cluster": cluster_name,
@@ -64,7 +70,7 @@ async def scale_deployment(
         "replicas": replicas,
         "namespace": namespace,
     }
-    return await _run_job("scale_cluster", payload)
+    return await _run_job("scale_cluster", payload, gateway_id=gateway_id)
 
 
 async def deploy_model(
@@ -75,6 +81,7 @@ async def deploy_model(
     gpu_count: int | None = None,
     image: str | None = None,
     env: dict | None = None,
+    gateway_id: str | None = None,
 ) -> dict:
     """
     Deploy an AI model onto a GPU cluster.
@@ -92,6 +99,8 @@ async def deploy_model(
         gpu_count: Number of GPUs to allocate per replica (optional).
         image: Override the default container image (optional).
         env: Environment variables to inject into the container (optional).
+        gateway_id: Gateway UUID from list_clusters. Omit for single-gateway deployments;
+                    provide to disambiguate when multiple gateways share a cluster name.
     """
     payload: dict = {
         "cluster": cluster_name,
@@ -105,7 +114,7 @@ async def deploy_model(
         payload["image"] = image
     if env:
         payload["env"] = env
-    return await _run_job("deploy_model", payload)
+    return await _run_job("deploy_model", payload, gateway_id=gateway_id)
 
 
 async def helm_upgrade(
@@ -114,6 +123,7 @@ async def helm_upgrade(
     chart: str,
     namespace: str = "default",
     values: dict | None = None,
+    gateway_id: str | None = None,
 ) -> dict:
     """
     Run helm upgrade --install for a chart on a cluster.
@@ -129,6 +139,8 @@ async def helm_upgrade(
         chart: Helm chart reference (e.g. bitnami/nginx or ./charts/myapp).
         namespace: Kubernetes namespace (default: 'default').
         values: Helm values to override (dict, optional).
+        gateway_id: Gateway UUID from list_clusters. Omit for single-gateway deployments;
+                    provide to disambiguate when multiple gateways share a cluster name.
     """
     payload: dict = {
         "cluster": cluster_name,
@@ -139,10 +151,15 @@ async def helm_upgrade(
     }
     if values:
         payload["values"] = values
-    return await _run_job("helm_upgrade", payload)
+    return await _run_job("helm_upgrade", payload, gateway_id=gateway_id)
 
 
-async def helm_uninstall(cluster_name: str, release_name: str, namespace: str = "default") -> dict:
+async def helm_uninstall(
+    cluster_name: str,
+    release_name: str,
+    namespace: str = "default",
+    gateway_id: str | None = None,
+) -> dict:
     """
     Uninstall a Helm release from a cluster.
 
@@ -154,15 +171,21 @@ async def helm_uninstall(cluster_name: str, release_name: str, namespace: str = 
         cluster_name: Target cluster.
         release_name: Name of the Helm release to remove.
         namespace: Kubernetes namespace (default: 'default').
+        gateway_id: Gateway UUID from list_clusters. Omit for single-gateway deployments;
+                    provide to disambiguate when multiple gateways share a cluster name.
     """
     return await _run_job_sync("helm_uninstall", {
         "cluster": cluster_name,
         "name": release_name,
         "namespace": namespace,
-    }, timeout=30)
+    }, timeout=30, gateway_id=gateway_id)
 
 
-async def run_kubectl(cluster_name: str, command: list[str]) -> dict:
+async def run_kubectl(
+    cluster_name: str,
+    command: list[str],
+    gateway_id: str | None = None,
+) -> dict:
     """
     Execute a kubectl command on a cluster.
 
@@ -180,14 +203,21 @@ async def run_kubectl(cluster_name: str, command: list[str]) -> dict:
         cluster_name: Target cluster.
         command: kubectl arguments as a list, without the 'kubectl' prefix.
                  Example: ["get", "pods", "-n", "default"]
+        gateway_id: Gateway UUID from list_clusters. Omit for single-gateway deployments;
+                    provide to disambiguate when multiple gateways share a cluster name.
     """
     return await _run_job_sync("kubectl_exec", {
         "cluster": cluster_name,
         "command": command,
-    })
+    }, gateway_id=gateway_id)
 
 
-async def git_clone(repo_url: str, branch: str = "main", cluster_name: str | None = None) -> dict:
+async def git_clone(
+    repo_url: str,
+    branch: str = "main",
+    cluster_name: str | None = None,
+    gateway_id: str | None = None,
+) -> dict:
     """
     Clone a git repository onto the VibOps gateway.
 
@@ -201,11 +231,13 @@ async def git_clone(repo_url: str, branch: str = "main", cluster_name: str | Non
         repo_url: Git repository URL (HTTPS or SSH).
         branch: Branch to clone (default: main).
         cluster_name: If provided, apply manifests to this cluster after cloning.
+        gateway_id: Gateway UUID from list_clusters. Omit for single-gateway deployments;
+                    provide to disambiguate when multiple gateways share a cluster name.
     """
     payload: dict = {"repo_url": repo_url, "branch": branch}
     if cluster_name:
         payload["cluster"] = cluster_name
-    return await _run_job("git_clone", payload)
+    return await _run_job("git_clone", payload, gateway_id=gateway_id)
 
 
 async def create_secret(name: str, value: str, description: str | None = None) -> dict:

@@ -310,3 +310,76 @@ async def test_run_job_sync_timeout_sets_timed_out_flag():
 
     assert result.get("timed_out") is True
     assert "get_job" in result.get("message", "")
+
+
+# ── gateway_id passthrough ────────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_scale_deployment_forwards_gateway_id():
+    """gateway_id must appear in the POST body when provided."""
+    with patch("vibops_mcp.tools.actions.client.post", new_callable=AsyncMock) as mock_post:
+        mock_post.return_value = JOB_PENDING
+        await actions.scale_deployment(
+            "prod-cluster", "llama3", 3, gateway_id="gw-uuid-123"
+        )
+
+    body = mock_post.call_args[1]["body"] if mock_post.call_args[1] else mock_post.call_args[0][1]
+    assert body["gateway_id"] == "gw-uuid-123"
+
+
+@pytest.mark.asyncio
+async def test_scale_deployment_no_gateway_id_omits_key():
+    """When gateway_id is not provided, it must not appear in the POST body."""
+    with patch("vibops_mcp.tools.actions.client.post", new_callable=AsyncMock) as mock_post:
+        mock_post.return_value = JOB_PENDING
+        await actions.scale_deployment("prod-cluster", "llama3", 3)
+
+    body = mock_post.call_args[1]["body"] if mock_post.call_args[1] else mock_post.call_args[0][1]
+    assert "gateway_id" not in body
+
+
+@pytest.mark.asyncio
+async def test_deploy_model_forwards_gateway_id():
+    with patch("vibops_mcp.tools.actions.client.post", new_callable=AsyncMock) as mock_post:
+        mock_post.return_value = JOB_PENDING
+        await actions.deploy_model("prod-cluster", "llama3:8b", gateway_id="gw-uuid-456")
+
+    body = mock_post.call_args[1]["body"] if mock_post.call_args[1] else mock_post.call_args[0][1]
+    assert body["gateway_id"] == "gw-uuid-456"
+
+
+@pytest.mark.asyncio
+async def test_run_kubectl_forwards_gateway_id():
+    with patch("vibops_mcp.tools.actions.client.post", new_callable=AsyncMock) as mock_post, \
+         patch("vibops_mcp.tools.actions.client.get", new_callable=AsyncMock) as mock_get, \
+         patch("asyncio.sleep", new_callable=AsyncMock):
+        mock_post.return_value = JOB_PENDING
+        mock_get.return_value = JOB_SUCCESS
+        await actions.run_kubectl("prod-cluster", ["get", "pods"], gateway_id="gw-uuid-789")
+
+    body = mock_post.call_args[1]["body"] if mock_post.call_args[1] else mock_post.call_args[0][1]
+    assert body["gateway_id"] == "gw-uuid-789"
+
+
+@pytest.mark.asyncio
+async def test_helm_upgrade_forwards_gateway_id():
+    with patch("vibops_mcp.tools.actions.client.post", new_callable=AsyncMock) as mock_post:
+        mock_post.return_value = JOB_PENDING
+        await actions.helm_upgrade(
+            "prod-cluster", "nginx", "bitnami/nginx", gateway_id="gw-uuid-abc"
+        )
+
+    body = mock_post.call_args[1]["body"] if mock_post.call_args[1] else mock_post.call_args[0][1]
+    assert body["gateway_id"] == "gw-uuid-abc"
+
+
+@pytest.mark.asyncio
+async def test_git_clone_forwards_gateway_id():
+    with patch("vibops_mcp.tools.actions.client.post", new_callable=AsyncMock) as mock_post:
+        mock_post.return_value = JOB_PENDING
+        await actions.git_clone(
+            "https://github.com/acme/ml-models", cluster_name="prod-cluster", gateway_id="gw-uuid-def"
+        )
+
+    body = mock_post.call_args[1]["body"] if mock_post.call_args[1] else mock_post.call_args[0][1]
+    assert body["gateway_id"] == "gw-uuid-def"

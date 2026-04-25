@@ -32,6 +32,7 @@ mcp = FastMCP(
         "You are connected to a VibOps instance that manages GPU Kubernetes infrastructure.\n\n"
         "Routing guide:\n"
         "- Start with list_clusters to discover available clusters before taking any action.\n"
+        "- list_clusters returns gateway_id per cluster — pass it to action tools when multiple gateways share a cluster name.\n"
         "- For general fleet health, call list_clusters then list_alerts.\n"
         "- To investigate a specific cluster, call get_cluster_deployments.\n"
         "- GPU utilisation: get_gpu_metrics. Cost: get_cost_estimate. Workload types: get_workload_breakdown.\n"
