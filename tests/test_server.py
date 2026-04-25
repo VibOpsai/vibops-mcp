@@ -1,101 +1,93 @@
 """
 Tests for vibops_mcp/server.py
 
-Verifies that MCP tool wrappers pass arguments correctly to the underlying
-actions functions — specifically catches positional-argument bugs like the
-one where namespace was passed as deployment_name.
+Verifies that all tools are registered on the MCP server with correct names,
+and that the server instructions include the routing guide.
+
+Note: argument routing is tested at the tool level in test_actions.py and
+test_observation.py — there are no wrappers to test here since tools are
+registered directly from tools/*.py.
 """
-import pytest
-from unittest.mock import AsyncMock, patch
+from vibops_mcp import server
 
 
-# ── scale_cluster ─────────────────────────────────────────────────────────────
+EXPECTED_TOOLS = {
+    # Observation (15)
+    "list_clusters",
+    "get_cluster_deployments",
+    "list_jobs",
+    "get_job",
+    "get_gpu_metrics",
+    "get_workload_breakdown",
+    "get_mttr",
+    "get_cost_estimate",
+    "list_gateways",
+    "list_alerts",
+    "list_secrets",
+    "list_providers",
+    "list_pipelines",
+    "get_cluster_rate",
+    "list_kubectl_contexts",
+    # Actions (8)
+    "scale_deployment",
+    "deploy_model",
+    "helm_upgrade",
+    "helm_uninstall",
+    "run_kubectl",
+    "git_clone",
+    "create_secret",
+    "trigger_pipeline",
+    # Config (3)
+    "set_cluster_rate",
+    "register_gateway",
+    "delete_gateway",
+}
 
-@pytest.mark.asyncio
-async def test_server_scale_cluster_passes_deployment_name():
-    """server.scale_cluster must forward deployment_name to actions.scale_cluster."""
-    from vibops_mcp import server
 
-    with patch("vibops_mcp.server.actions.scale_cluster", new_callable=AsyncMock) as mock_action:
-        mock_action.return_value = {"status": "pending"}
-        await server.scale_cluster(
-            cluster_name="kind-vibops-dev",
-            replicas=3,
-            deployment_name="llama3",
-            namespace="default",
-        )
+def _registered_tool_names() -> set[str]:
+    """Extract the set of registered tool names from the FastMCP instance."""
+    # FastMCP stores tools in _tool_manager or similar; fall back to iterating
+    try:
+        return {name for name in server.mcp._tool_manager._tools}
+    except AttributeError:
+        pass
+    try:
+        return {t.name for t in server.mcp.list_tools()}
+    except Exception:
+        pass
+    # Last resort: inspect the tools dict directly
+    return set(getattr(server.mcp, "_tools", {}).keys())
 
-    mock_action.assert_called_once_with("kind-vibops-dev", 3, "llama3", "default")
+
+def test_all_tools_registered():
+    """All 26 expected tools must be registered on the MCP server."""
+    registered = _registered_tool_names()
+    missing = EXPECTED_TOOLS - registered
+    assert not missing, f"Tools not registered: {missing}"
 
 
-@pytest.mark.asyncio
-async def test_server_scale_cluster_namespace_not_passed_as_deployment_name():
-    """
-    Regression: namespace must NOT end up in the deployment_name position.
-    Before the fix: actions.scale_cluster(cluster, replicas, namespace)
-    caused namespace="default" to be interpreted as deployment_name.
-    """
-    from vibops_mcp import server
+def test_no_unexpected_tools():
+    """No extra tools should be registered beyond the expected 26."""
+    registered = _registered_tool_names()
+    unexpected = registered - EXPECTED_TOOLS
+    assert not unexpected, f"Unexpected tools registered: {unexpected}"
 
-    with patch("vibops_mcp.server.actions.scale_cluster", new_callable=AsyncMock) as mock_action:
-        mock_action.return_value = {"status": "pending"}
-        await server.scale_cluster(
-            cluster_name="kind-vibops-dev",
-            replicas=3,
-            namespace="default",
-        )
 
-    args = mock_action.call_args[0]
-    # args: (cluster_name, replicas, deployment_name, namespace)
-    deployment_name_arg = args[2]
-    namespace_arg = args[3]
-
-    assert deployment_name_arg is None, (
-        f"deployment_name should be None when not provided, got {deployment_name_arg!r}"
+def test_scale_deployment_registered_not_scale_cluster():
+    """scale_deployment must be registered (renamed from scale_cluster)."""
+    registered = _registered_tool_names()
+    assert "scale_deployment" in registered
+    assert "scale_cluster" not in registered, (
+        "scale_cluster was renamed to scale_deployment — old name must not be registered"
     )
-    assert namespace_arg == "default", (
-        f"namespace should be 'default', got {namespace_arg!r}"
-    )
 
 
-@pytest.mark.asyncio
-async def test_server_scale_cluster_all_none_optional_args():
-    """Calling with only required args must pass None for optional ones."""
-    from vibops_mcp import server
-
-    with patch("vibops_mcp.server.actions.scale_cluster", new_callable=AsyncMock) as mock_action:
-        mock_action.return_value = {"status": "pending"}
-        await server.scale_cluster(cluster_name="kind-vibops-dev", replicas=1)
-
-    mock_action.assert_called_once_with("kind-vibops-dev", 1, None, None)
-
-
-# ── run_kubectl ───────────────────────────────────────────────────────────────
-
-@pytest.mark.asyncio
-async def test_server_run_kubectl_passes_args():
-    from vibops_mcp import server
-
-    with patch("vibops_mcp.server.actions.run_kubectl", new_callable=AsyncMock) as mock_action:
-        mock_action.return_value = {"status": "success"}
-        await server.run_kubectl("kind-vibops-dev", ["get", "pods", "-n", "ai"])
-
-    mock_action.assert_called_once_with("kind-vibops-dev", ["get", "pods", "-n", "ai"])
-
-
-# ── deploy_model ──────────────────────────────────────────────────────────────
-
-@pytest.mark.asyncio
-async def test_server_deploy_model_passes_args():
-    from vibops_mcp import server
-
-    with patch("vibops_mcp.server.actions.deploy_model", new_callable=AsyncMock) as mock_action:
-        mock_action.return_value = {"status": "pending"}
-        await server.deploy_model(
-            cluster_name="kind-vibops-dev",
-            model_name="llama3:8b",
-            namespace="default",
-            replicas=2,
-        )
-
-    mock_action.assert_called_once_with("kind-vibops-dev", "llama3:8b", "default", 2, None)
+def test_server_instructions_contain_routing_guide():
+    """MCP instructions must contain the routing guide for correct tool selection."""
+    instructions = server.mcp._instructions if hasattr(server.mcp, "_instructions") else ""
+    if not instructions:
+        # Try alternate attribute names
+        instructions = getattr(server.mcp, "instructions", "") or ""
+    assert "list_clusters" in instructions
+    assert "scale_deployment" in instructions
+    assert "run_kubectl" in instructions
