@@ -17,7 +17,7 @@ async def test_list_clusters_calls_correct_endpoint():
     with patch("vibops_mcp.tools.observation.client.get", new_callable=AsyncMock) as mock_get:
         mock_get.return_value = []
         await observation.list_clusters()
-    mock_get.assert_called_once_with("/api/v1/clusters")
+    mock_get.assert_called_once_with("/api/v1/gateways")
 
 
 # ── get_cluster_deployments ───────────────────────────────────────────────────
