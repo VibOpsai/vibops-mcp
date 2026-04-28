@@ -221,3 +221,29 @@ async def list_kubectl_contexts() -> dict:
     context name mismatches. For normal cluster discovery, use list_clusters.
     """
     return await client.get("/api/v1/clusters/contexts")
+
+
+async def get_job_metrics(hours: int = 24) -> dict:
+    """
+    Return job execution SLIs for the last N hours: throughput, success rate,
+    and p50/p95 latency broken down by action type.
+
+    Call this when the user asks whether operations are healthy, whether jobs are
+    failing, or how long specific actions typically take. For individual job status,
+    use get_job or list_jobs instead.
+
+    Response shape:
+      summary.total              — total jobs submitted
+      summary.succeeded          — jobs that completed successfully
+      summary.failed             — jobs that failed
+      summary.in_flight          — jobs currently pending or running
+      summary.success_rate_pct   — overall success rate (null if no jobs)
+      by_action[].action         — action name (scale_cluster, deploy_model, …)
+      by_action[].p50_seconds    — median execution time
+      by_action[].p95_seconds    — 95th-percentile execution time
+      hourly[]                   — per-hour succeeded/failed counts for sparklines
+
+    Args:
+        hours: Look-back window in hours (default 24, max 720).
+    """
+    return await client.get("/api/v1/metrics/jobs", params={"hours": hours})

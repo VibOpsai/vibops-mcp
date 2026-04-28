@@ -36,6 +36,7 @@ mcp = FastMCP(
         "- For general fleet health, call list_clusters then list_alerts.\n"
         "- To investigate a specific cluster, call get_cluster_deployments.\n"
         "- GPU utilisation: get_gpu_metrics. Cost: get_cost_estimate. Workload types: get_workload_breakdown.\n"
+        "- Job health (success rate, latency): get_job_metrics. For individual jobs: get_job or list_jobs.\n"
         "- To scale pods in a deployment, use scale_deployment. Do not use helm or run_kubectl for scaling.\n"
         "- To deploy a model, use deploy_model. For arbitrary Helm charts, use helm_upgrade.\n"
         "- Use run_kubectl only for operations not covered by dedicated tools (get, describe, logs).\n"
@@ -46,7 +47,7 @@ mcp = FastMCP(
 )
 
 
-# ── Observation tools (15) ────────────────────────────────────────────────────
+# ── Observation tools (16) ────────────────────────────────────────────────────
 # Docstrings live in tools/observation.py — registered directly to avoid duplication.
 
 mcp.tool()(observation.list_clusters)
@@ -57,6 +58,7 @@ mcp.tool()(observation.get_gpu_metrics)
 mcp.tool()(observation.get_workload_breakdown)
 mcp.tool()(observation.get_mttr)
 mcp.tool()(observation.get_cost_estimate)
+mcp.tool()(observation.get_job_metrics)
 mcp.tool()(observation.list_gateways)
 mcp.tool()(observation.list_alerts)
 mcp.tool()(observation.list_secrets)
