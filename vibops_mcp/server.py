@@ -68,7 +68,7 @@ mcp.tool()(observation.get_cluster_rate)
 mcp.tool()(observation.list_kubectl_contexts)
 
 
-# ── Action tools (8) ──────────────────────────────────────────────────────────
+# ── Action tools (14) ─────────────────────────────────────────────────────────
 # Docstrings live in tools/actions.py — registered directly to avoid duplication.
 
 mcp.tool()(actions.scale_deployment)
@@ -79,6 +79,14 @@ mcp.tool()(actions.run_kubectl)
 mcp.tool()(actions.git_clone)
 mcp.tool()(actions.create_secret)
 mcp.tool()(actions.trigger_pipeline)
+
+# Slurm HPC
+mcp.tool()(actions.slurm_get_cluster_info)
+mcp.tool()(actions.slurm_list_jobs)
+mcp.tool()(actions.slurm_get_job_status)
+mcp.tool()(actions.slurm_get_job_output)
+mcp.tool()(actions.slurm_submit_job)
+mcp.tool()(actions.slurm_cancel_job)
 
 
 # ── Configuration tools (3) ───────────────────────────────────────────────────
