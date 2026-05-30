@@ -4,15 +4,15 @@ Tests for vibops_mcp/server.py
 Verifies that all tools are registered on the MCP server with correct names,
 and that the server instructions include the routing guide.
 
-Note: argument routing is tested at the tool level in test_actions.py and
-test_observation.py — there are no wrappers to test here since tools are
-registered directly from tools/*.py.
+Note: argument routing is tested at the tool level in test_actions.py,
+test_observation.py, test_governance.py and test_finops.py — there are no
+wrappers to test here since tools are registered directly from tools/*.py.
 """
 from vibops_mcp import server
 
 
 EXPECTED_TOOLS = {
-    # Observation (15)
+    # Observation (16)
     "list_clusters",
     "get_cluster_deployments",
     "list_jobs",
@@ -21,6 +21,7 @@ EXPECTED_TOOLS = {
     "get_workload_breakdown",
     "get_mttr",
     "get_cost_estimate",
+    "get_job_metrics",
     "list_gateways",
     "list_alerts",
     "list_secrets",
@@ -28,7 +29,7 @@ EXPECTED_TOOLS = {
     "list_pipelines",
     "get_cluster_rate",
     "list_kubectl_contexts",
-    # Actions (8)
+    # Actions (14)
     "scale_deployment",
     "deploy_model",
     "helm_upgrade",
@@ -37,16 +38,49 @@ EXPECTED_TOOLS = {
     "git_clone",
     "create_secret",
     "trigger_pipeline",
+    "slurm_get_cluster_info",
+    "slurm_list_jobs",
+    "slurm_get_job_status",
+    "slurm_get_job_output",
+    "slurm_submit_job",
+    "slurm_cancel_job",
     # Config (3)
     "set_cluster_rate",
     "register_gateway",
     "delete_gateway",
+    # Governance (22)
+    "list_anomalies",
+    "get_open_anomalies",
+    "resolve_anomaly",
+    "list_ai_act_controls",
+    "get_ai_act_score",
+    "update_ai_act_control",
+    "list_compliance_reports",
+    "generate_compliance_report",
+    "get_compliance_report",
+    "list_audit_logs",
+    "verify_audit_chain",
+    "get_policy",
+    "update_policy",
+    "list_agent_identities",
+    "create_agent_identity",
+    "rotate_agent_identity",
+    "revoke_agent_identity",
+    "get_agent_dependency_graph",
+    "get_agent_dependencies",
+    "list_eval_rubrics",
+    "evaluate_job",
+    "get_job_evaluations",
+    # FinOps (4)
+    "get_budget",
+    "get_chargeback",
+    "get_spend_trend",
+    "get_waste_analysis",
 }
 
 
 def _registered_tool_names() -> set[str]:
     """Extract the set of registered tool names from the FastMCP instance."""
-    # FastMCP stores tools in _tool_manager or similar; fall back to iterating
     try:
         return {name for name in server.mcp._tool_manager._tools}
     except AttributeError:
@@ -55,19 +89,18 @@ def _registered_tool_names() -> set[str]:
         return {t.name for t in server.mcp.list_tools()}
     except Exception:
         pass
-    # Last resort: inspect the tools dict directly
     return set(getattr(server.mcp, "_tools", {}).keys())
 
 
 def test_all_tools_registered():
-    """All 26 expected tools must be registered on the MCP server."""
+    """All 59 expected tools must be registered on the MCP server."""
     registered = _registered_tool_names()
     missing = EXPECTED_TOOLS - registered
     assert not missing, f"Tools not registered: {missing}"
 
 
 def test_no_unexpected_tools():
-    """No extra tools should be registered beyond the expected 26."""
+    """No extra tools should be registered beyond the expected 59."""
     registered = _registered_tool_names()
     unexpected = registered - EXPECTED_TOOLS
     assert not unexpected, f"Unexpected tools registered: {unexpected}"
@@ -83,11 +116,15 @@ def test_scale_deployment_registered_not_scale_cluster():
 
 
 def test_server_instructions_contain_routing_guide():
-    """MCP instructions must contain the routing guide for correct tool selection."""
+    """MCP instructions must contain routing hints for all major tool groups."""
     instructions = server.mcp._instructions if hasattr(server.mcp, "_instructions") else ""
     if not instructions:
-        # Try alternate attribute names
         instructions = getattr(server.mcp, "instructions", "") or ""
     assert "list_clusters" in instructions
     assert "scale_deployment" in instructions
     assert "run_kubectl" in instructions
+    assert "get_open_anomalies" in instructions
+    assert "get_ai_act_score" in instructions
+    assert "generate_compliance_report" in instructions
+    assert "verify_audit_chain" in instructions
+    assert "get_waste_analysis" in instructions

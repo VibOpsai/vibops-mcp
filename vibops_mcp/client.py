@@ -71,5 +71,13 @@ async def post(path: str, body: dict | None = None) -> dict:
     return await _request("POST", path, json=body or {})
 
 
+async def put(path: str, body: dict | None = None) -> dict:
+    return await _request("PUT", path, json=body or {})
+
+
+async def patch(path: str, body: dict | None = None) -> dict:
+    return await _request("PATCH", path, json=body or {})
+
+
 async def delete(path: str) -> dict:
     return await _request("DELETE", path)
