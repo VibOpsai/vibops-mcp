@@ -4,15 +4,16 @@ The provider-agnostic MCP server for GPU infrastructure — one interface for an
 
 ## The problem
 
-Large enterprises and CSPs managing GPU infrastructure deal with fragmentation — AWS, GCP, Azure, on-prem, neoclouds, each with their own API, dashboard, and cost model. Correlating utilisation, cost, and workload type across providers requires jumping between 5 tools.
+Large enterprises and CSPs managing GPU infrastructure deal with fragmentation — AWS, GCP, Azure, on-prem, neoclouds, each with their own API, dashboard, and cost model. Correlating utilisation, cost, workload type, and compliance posture across providers requires jumping between 5 tools.
 
 ## The solution
 
-`vibops-mcp` is a single MCP server that abstracts this complexity. One `pip install`, 26 tools, and your AI assistant can observe, operate, and optimize your entire GPU fleet — regardless of where it runs.
+`vibops-mcp` is a single MCP server that abstracts this complexity. One `pip install`, 59 tools, and your AI assistant can observe, operate, govern, and optimize your entire GPU fleet — regardless of where it runs.
 
 - **Observe** — GPU utilisation, workload breakdown, MTTR, cost estimates, live K8s deployments
-- **Act** — deploy models, scale clusters, run Helm/kubectl, trigger pipelines
-- **Configure** — set cost rates, manage gateways, store secrets
+- **Act** — deploy models, scale deployments, run Helm/kubectl, trigger pipelines, submit Slurm jobs
+- **Govern** — anomaly detection, AI Act compliance, SOC 2/RGPD reports, immutable audit chain, policy management
+- **FinOps** — budget tracking, chargeback, spend trends, waste analysis
 
 All operations go through your VibOps instance and are recorded in the audit log.
 
@@ -77,7 +78,7 @@ claude mcp add vibops vibops-mcp \
 
 ## Available tools
 
-### Observation (read-only)
+### Observation (16 tools — read-only)
 
 | Tool | Description |
 |------|-------------|
@@ -87,6 +88,7 @@ claude mcp add vibops vibops-mcp \
 | `get_cluster_rate` | Get configured GPU cost rate for a cluster |
 | `list_jobs` | List recent jobs with optional filters |
 | `get_job` | Get job details and result |
+| `get_job_metrics` | Job success rate, latency P50/P95/P99, error breakdown |
 | `get_gpu_metrics` | Hourly GPU utilisation time-series |
 | `get_workload_breakdown` | Job count by workload type |
 | `get_mttr` | Mean Time To Resolve GPU alerts |
@@ -97,11 +99,11 @@ claude mcp add vibops vibops-mcp \
 | `list_providers` | List configured AI/GPU cloud providers |
 | `list_pipelines` | List automation pipelines |
 
-### Actions (write)
+### Actions (14 tools — write)
 
 | Tool | Description |
 |------|-------------|
-| `scale_cluster` | Scale a K8s deployment or node pool |
+| `scale_deployment` | Scale a K8s deployment replica count |
 | `deploy_model` | Deploy an AI model onto a GPU cluster |
 | `helm_upgrade` | Run helm upgrade --install |
 | `helm_uninstall` | Uninstall a Helm release |
@@ -109,14 +111,56 @@ claude mcp add vibops vibops-mcp \
 | `git_clone` | Clone a git repository |
 | `create_secret` | Store an encrypted secret |
 | `trigger_pipeline` | Manually trigger an automation pipeline |
+| `slurm_get_cluster_info` | Get Slurm cluster info and partition details |
+| `slurm_list_jobs` | List Slurm jobs with optional filters |
+| `slurm_get_job_status` | Get status of a specific Slurm job |
+| `slurm_get_job_output` | Retrieve stdout/stderr of a completed Slurm job |
+| `slurm_submit_job` | Submit a new Slurm job |
+| `slurm_cancel_job` | Cancel a running or pending Slurm job |
 
-### Configuration
+### Configuration (3 tools)
 
 | Tool | Description |
 |------|-------------|
 | `set_cluster_rate` | Set GPU cost rate for a cluster (admin only) |
 | `register_gateway` | Register a new gateway (returns one-time token) |
 | `delete_gateway` | Revoke a gateway |
+
+### Governance (22 tools)
+
+| Tool | Description |
+|------|-------------|
+| `list_anomalies` | List GPU anomalies with optional cluster/status filter |
+| `get_open_anomalies` | Get all currently open anomalies |
+| `resolve_anomaly` | Mark an anomaly as resolved |
+| `list_ai_act_controls` | List AI Act compliance controls |
+| `get_ai_act_score` | Get the overall AI Act compliance score |
+| `update_ai_act_control` | Update status, notes, or evidence URL for a control |
+| `list_compliance_reports` | List generated compliance reports |
+| `generate_compliance_report` | Generate a SOC 2, RGPD, or HIPAA report asynchronously |
+| `get_compliance_report` | Poll/retrieve a generated compliance report |
+| `list_audit_logs` | Query the immutable audit log with filters |
+| `verify_audit_chain` | Verify HMAC-SHA256 integrity of the full audit chain |
+| `get_policy` | Get the current organisation policy |
+| `update_policy` | Replace the organisation policy (immediate effect) |
+| `list_agent_identities` | List machine identities for agents |
+| `create_agent_identity` | Create a new machine identity (key shown once) |
+| `rotate_agent_identity` | Rotate the key for an existing identity |
+| `revoke_agent_identity` | Revoke an identity immediately |
+| `get_agent_dependency_graph` | Get the full org-wide agent dependency graph |
+| `get_agent_dependencies` | Get dependencies for a specific agent |
+| `list_eval_rubrics` | List LLM-as-judge evaluation rubrics |
+| `evaluate_job` | Trigger LLM-as-judge evaluation for a job |
+| `get_job_evaluations` | Retrieve evaluation results for a job |
+
+### FinOps (4 tools)
+
+| Tool | Description |
+|------|-------------|
+| `get_budget` | Get current budget and consumed spend |
+| `get_chargeback` | Get chargeback breakdown by tenant for a given month |
+| `get_spend_trend` | Get daily GPU spend trend (default: last 30 days) |
+| `get_waste_analysis` | Identify idle GPU resources and cost optimisation opportunities |
 
 ## Example prompts
 
@@ -125,28 +169,16 @@ claude mcp add vibops vibops-mcp \
 "Show me the cost breakdown per cluster this week."
 "Deploy llama3:8b on vibops-dev with 2 replicas."
 "Which clusters have open critical GPU alerts?"
-"Scale the inference namespace to 4 replicas on prod-cluster."
+"Scale the inference deployment to 4 replicas on prod-cluster."
 "What's our MTTR for critical alerts?"
+"Are there any open GPU anomalies right now?"
+"What's our AI Act compliance score and which controls are non-compliant?"
+"Generate a SOC 2 report for Q1 2026."
+"Verify the audit chain hasn't been tampered with."
+"Show me the spend trend for the last 7 days and flag any waste."
+"Create a machine identity for the pricing-agent with a 1-year expiry."
+"Which agents depend on the claude-opus-4-6 model?"
 ```
-
-## Roadmap
-
-### Wave 1 — Current (v0.1)
-- ✅ Kubernetes (generic — on-prem, Kind, kubeadm)
-- ✅ Any VibOps-connected cluster via gateway
-
-### Wave 2 — Q2 2026
-- 🔜 NVIDIA DGX Cloud (NGC API)
-- 🔜 AWS (EC2 GPU + EKS)
-- 🔜 GCP (A3/A2 + GKE)
-- 🔜 Azure (ND/NC series + AKS)
-
-### Wave 3 — Q3 2026
-- 🔜 CoreWeave, Lambda Labs, RunPod
-- 🔜 OVHcloud, Scaleway
-- 🔜 Dell APEX, HPE GreenLake
-
-Want a provider prioritised? [Open an issue](https://github.com/VibOpsai/vibops-mcp/issues/new).
 
 ## Contributing
 
