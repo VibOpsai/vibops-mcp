@@ -274,3 +274,196 @@ async def trigger_pipeline(pipeline_id: str, payload: dict | None = None) -> dic
         payload: Optional input parameters passed to the pipeline steps.
     """
     return await client.post(f"/api/v1/pipelines/{pipeline_id}/trigger", body=payload or {})
+
+
+# ── Slurm HPC (6 tools) ───────────────────────────────────────────────────────
+
+async def slurm_get_cluster_info(
+    host: str | None = None,
+    partition: str | None = None,
+    gateway_id: str | None = None,
+) -> dict:
+    """
+    Get Slurm cluster information: partitions, node states, and GPU availability.
+
+    Returns a summary of all nodes, their GPU resources (GRES), memory, and
+    current state (idle / allocated / down).
+
+    Args:
+        host: Slurm head node hostname. Overrides the SLURM_HOST env var on the gateway.
+        partition: Filter output to a specific partition (optional).
+        gateway_id: Gateway UUID for the site where the Slurm cluster is deployed.
+    """
+    payload: dict = {}
+    if host:
+        payload["host"] = host
+    if partition:
+        payload["partition"] = partition
+    return await _run_job_sync("slurm_get_cluster_info", payload, timeout=20, gateway_id=gateway_id)
+
+
+async def slurm_list_jobs(
+    host: str | None = None,
+    user: str | None = None,
+    partition: str | None = None,
+    state: str | None = None,
+    gateway_id: str | None = None,
+) -> dict:
+    """
+    List running and pending Slurm jobs.
+
+    Returns job ID, name, user, state, partition, node count, GPU allocation,
+    submit time, and time limit for each job.
+
+    Args:
+        host: Slurm head node hostname (overrides SLURM_HOST).
+        user: Filter by username (optional).
+        partition: Filter by partition name (optional).
+        state: Filter by job state — RUNNING, PENDING, FAILED, COMPLETED (optional).
+        gateway_id: Gateway UUID for the target site.
+    """
+    payload: dict = {}
+    if host:
+        payload["host"] = host
+    if user:
+        payload["user"] = user
+    if partition:
+        payload["partition"] = partition
+    if state:
+        payload["state"] = state
+    return await _run_job_sync("slurm_list_jobs", payload, timeout=20, gateway_id=gateway_id)
+
+
+async def slurm_get_job_status(
+    job_id: int,
+    host: str | None = None,
+    gateway_id: str | None = None,
+) -> dict:
+    """
+    Get the current status and resource usage of a specific Slurm job.
+
+    Queries squeue for running/pending jobs and falls back to sacct for
+    completed or failed jobs.
+
+    Args:
+        job_id: Slurm job ID.
+        host: Slurm head node hostname (overrides SLURM_HOST).
+        gateway_id: Gateway UUID for the target site.
+    """
+    payload: dict = {"job_id": job_id}
+    if host:
+        payload["host"] = host
+    return await _run_job_sync("slurm_get_job_status", payload, timeout=20, gateway_id=gateway_id)
+
+
+async def slurm_get_job_output(
+    job_id: int,
+    host: str | None = None,
+    log_path: str | None = None,
+    lines: int = 50,
+    gateway_id: str | None = None,
+) -> dict:
+    """
+    Tail the stdout log file of a Slurm job to monitor training progress.
+
+    Reads the last N lines of the job's output file. If log_path is omitted,
+    defaults to slurm-{job_id}.out in the user's home directory.
+
+    Args:
+        job_id: Slurm job ID.
+        host: Slurm head node hostname (overrides SLURM_HOST).
+        log_path: Explicit path to the log file (optional).
+        lines: Number of lines to return (default: 50).
+        gateway_id: Gateway UUID for the target site.
+    """
+    payload: dict = {"job_id": job_id, "lines": lines}
+    if host:
+        payload["host"] = host
+    if log_path:
+        payload["log_path"] = log_path
+    return await _run_job_sync("slurm_get_job_output", payload, timeout=20, gateway_id=gateway_id)
+
+
+async def slurm_submit_job(
+    job_name: str,
+    nodes: int,
+    gpus_per_node: int,
+    script: str,
+    host: str | None = None,
+    partition: str | None = None,
+    ntasks_per_node: int | None = None,
+    time: str | None = None,
+    output: str | None = None,
+    error: str | None = None,
+    account: str | None = None,
+    dry_run: bool = False,
+    gateway_id: str | None = None,
+) -> dict:
+    """
+    Submit a multi-node GPU training job to Slurm via sbatch.
+
+    Generates a complete sbatch script from the provided spec and submits it.
+    Set dry_run=true to preview the script without submitting.
+
+    Write operation — recorded in the audit log.
+
+    Args:
+        job_name: Job name (--job-name).
+        nodes: Number of nodes to allocate (--nodes).
+        gpus_per_node: GPUs per node (--gpus-per-node).
+        script: Shell script body — the command to run (e.g. torchrun --nproc_per_node=8 train.py).
+        host: Slurm head node hostname (overrides SLURM_HOST).
+        partition: Target Slurm partition (--partition).
+        ntasks_per_node: MPI tasks per node (default: gpus_per_node).
+        time: Wall-clock time limit in HH:MM:SS or D-HH:MM:SS format (--time).
+        output: Path to stdout log file (default: slurm-%j.out).
+        error: Path to stderr log file (default: slurm-%j.err).
+        account: Slurm account / allocation for billing (--account).
+        dry_run: If true, return the sbatch script without submitting.
+        gateway_id: Gateway UUID for the site where the Slurm cluster is deployed.
+    """
+    payload: dict = {
+        "job_name":      job_name,
+        "nodes":         nodes,
+        "gpus_per_node": gpus_per_node,
+        "script":        script,
+        "dry_run":       dry_run,
+    }
+    if host:
+        payload["host"] = host
+    if partition:
+        payload["partition"] = partition
+    if ntasks_per_node is not None:
+        payload["ntasks_per_node"] = ntasks_per_node
+    if time:
+        payload["time"] = time
+    if output:
+        payload["output"] = output
+    if error:
+        payload["error"] = error
+    if account:
+        payload["account"] = account
+    return await _run_job_sync("slurm_submit_job", payload, timeout=30, gateway_id=gateway_id)
+
+
+async def slurm_cancel_job(
+    job_id: int,
+    host: str | None = None,
+    signal: str = "SIGTERM",
+    gateway_id: str | None = None,
+) -> dict:
+    """
+    Cancel a running or pending Slurm job by job ID (scancel).
+
+    Write operation — recorded in the audit log.
+
+    Args:
+        job_id: Slurm job ID to cancel.
+        host: Slurm head node hostname (overrides SLURM_HOST).
+        signal: Signal to send to the job (default: SIGTERM). Use SIGKILL for immediate termination.
+        gateway_id: Gateway UUID for the target site.
+    """
+    payload: dict = {"job_id": job_id, "signal": signal}
+    if host:
+        payload["host"] = host
+    return await _run_job_sync("slurm_cancel_job", payload, timeout=20, gateway_id=gateway_id)
