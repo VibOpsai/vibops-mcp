@@ -50,6 +50,9 @@ mcp = FastMCP(
         "- Agent dependencies: get_agent_dependency_graph for org-wide view, get_agent_dependencies for one agent.\n"
         "- Job quality: list_eval_rubrics, evaluate_job, get_job_evaluations.\n"
         "- GPU cost & waste: get_budget, get_spend_trend, get_chargeback, get_waste_analysis.\n"
+        "- LDAP / Active Directory: get_ldap_config to inspect, update_ldap_config to configure or enable/disable.\n"
+        "- SIEM push: get_siem_config to inspect, update_siem_config to set Splunk/Datadog destination, push_to_siem to export audit events.\n"
+        "- Container registry: registry_list_repos, registry_list_tags, registry_check_image for inspection; registry_delete_tag (confirmed=True) to remove stale tags.\n"
         "- All write operations (deploy, scale, helm, kubectl, policy, identities) are recorded in the VibOps audit log.\n"
         "- VibOps jobs are infrastructure operations, not Kubernetes Jobs. Use list_jobs to review recent operations."
     ),
@@ -94,6 +97,12 @@ mcp.tool()(actions.slurm_get_job_status)
 mcp.tool()(actions.slurm_get_job_output)
 mcp.tool()(actions.slurm_submit_job)
 mcp.tool()(actions.slurm_cancel_job)
+
+# Container registry
+mcp.tool()(actions.registry_list_repos)
+mcp.tool()(actions.registry_list_tags)
+mcp.tool()(actions.registry_check_image)
+mcp.tool()(actions.registry_delete_tag)
 
 
 # ── Configuration tools (3) ───────────────────────────────────────────────────
@@ -142,6 +151,15 @@ mcp.tool()(governance.get_agent_dependencies)
 mcp.tool()(governance.list_eval_rubrics)
 mcp.tool()(governance.evaluate_job)
 mcp.tool()(governance.get_job_evaluations)
+
+# LDAP / Active Directory
+mcp.tool()(governance.get_ldap_config)
+mcp.tool()(governance.update_ldap_config)
+
+# SIEM push export
+mcp.tool()(governance.get_siem_config)
+mcp.tool()(governance.update_siem_config)
+mcp.tool()(governance.push_to_siem)
 
 
 # ── FinOps tools (4) ──────────────────────────────────────────────────────────

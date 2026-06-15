@@ -383,3 +383,136 @@ async def test_git_clone_forwards_gateway_id():
 
     body = mock_post.call_args[1]["body"] if mock_post.call_args[1] else mock_post.call_args[0][1]
     assert body["gateway_id"] == "gw-uuid-def"
+
+
+# ── Container Registry ────────────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_registry_list_repos_harbor_payload():
+    with patch("vibops_mcp.tools.actions.client.post", new_callable=AsyncMock) as mock_post, \
+         patch("vibops_mcp.tools.actions.client.get", new_callable=AsyncMock) as mock_get, \
+         patch("asyncio.sleep", new_callable=AsyncMock):
+        mock_post.return_value = JOB_PENDING
+        mock_get.return_value = JOB_SUCCESS
+        await actions.registry_list_repos(
+            registry_type="harbor",
+            registry_url="https://registry.acme.com",
+            project="myproject",
+            username="admin",
+            password="Harbor12345",
+            limit=20,
+        )
+    body = mock_post.call_args[1]["body"] if mock_post.call_args[1] else mock_post.call_args[0][1]
+    assert body["action"] == "registry_list_repos"
+    payload = body["payload"]
+    assert payload["registry_type"] == "harbor"
+    assert payload["registry_url"] == "https://registry.acme.com"
+    assert payload["project"] == "myproject"
+    assert payload["limit"] == 20
+
+
+@pytest.mark.asyncio
+async def test_registry_list_repos_ecr_payload():
+    with patch("vibops_mcp.tools.actions.client.post", new_callable=AsyncMock) as mock_post, \
+         patch("vibops_mcp.tools.actions.client.get", new_callable=AsyncMock) as mock_get, \
+         patch("asyncio.sleep", new_callable=AsyncMock):
+        mock_post.return_value = JOB_PENDING
+        mock_get.return_value = JOB_SUCCESS
+        await actions.registry_list_repos(registry_type="ecr", region="eu-west-1")
+    body = mock_post.call_args[1]["body"] if mock_post.call_args[1] else mock_post.call_args[0][1]
+    payload = body["payload"]
+    assert payload["registry_type"] == "ecr"
+    assert payload["region"] == "eu-west-1"
+    assert "registry_url" not in payload  # not supplied → omitted
+
+
+@pytest.mark.asyncio
+async def test_registry_list_tags_payload():
+    with patch("vibops_mcp.tools.actions.client.post", new_callable=AsyncMock) as mock_post, \
+         patch("vibops_mcp.tools.actions.client.get", new_callable=AsyncMock) as mock_get, \
+         patch("asyncio.sleep", new_callable=AsyncMock):
+        mock_post.return_value = JOB_PENDING
+        mock_get.return_value = JOB_SUCCESS
+        await actions.registry_list_tags(
+            registry_type="harbor",
+            image="myproject/myapp",
+            registry_url="https://registry.acme.com",
+            username="admin",
+            password="Harbor12345",
+        )
+    body = mock_post.call_args[1]["body"] if mock_post.call_args[1] else mock_post.call_args[0][1]
+    assert body["action"] == "registry_list_tags"
+    payload = body["payload"]
+    assert payload["image"] == "myproject/myapp"
+    assert payload["registry_type"] == "harbor"
+
+
+@pytest.mark.asyncio
+async def test_registry_check_image_payload():
+    with patch("vibops_mcp.tools.actions.client.post", new_callable=AsyncMock) as mock_post, \
+         patch("vibops_mcp.tools.actions.client.get", new_callable=AsyncMock) as mock_get, \
+         patch("asyncio.sleep", new_callable=AsyncMock):
+        mock_post.return_value = JOB_PENDING
+        mock_get.return_value = JOB_SUCCESS
+        await actions.registry_check_image(
+            registry_type="ecr",
+            image="myapp:v2.0.0",
+            region="us-east-1",
+        )
+    body = mock_post.call_args[1]["body"] if mock_post.call_args[1] else mock_post.call_args[0][1]
+    assert body["action"] == "registry_check_image"
+    payload = body["payload"]
+    assert payload["image"] == "myapp:v2.0.0"
+    assert payload["region"] == "us-east-1"
+
+
+@pytest.mark.asyncio
+async def test_registry_delete_tag_confirmed_payload():
+    with patch("vibops_mcp.tools.actions.client.post", new_callable=AsyncMock) as mock_post, \
+         patch("vibops_mcp.tools.actions.client.get", new_callable=AsyncMock) as mock_get, \
+         patch("asyncio.sleep", new_callable=AsyncMock):
+        mock_post.return_value = JOB_PENDING
+        mock_get.return_value = JOB_SUCCESS
+        await actions.registry_delete_tag(
+            registry_type="harbor",
+            image="myproject/myapp:old-tag",
+            registry_url="https://registry.acme.com",
+            username="admin",
+            password="Harbor12345",
+            confirmed=True,
+        )
+    body = mock_post.call_args[1]["body"] if mock_post.call_args[1] else mock_post.call_args[0][1]
+    assert body["action"] == "registry_delete_tag"
+    payload = body["payload"]
+    assert payload["image"] == "myproject/myapp:old-tag"
+    assert payload["confirmed"] is True
+
+
+@pytest.mark.asyncio
+async def test_registry_delete_tag_dry_run_by_default():
+    """confirmed defaults to False — dry run unless explicitly confirmed."""
+    with patch("vibops_mcp.tools.actions.client.post", new_callable=AsyncMock) as mock_post, \
+         patch("vibops_mcp.tools.actions.client.get", new_callable=AsyncMock) as mock_get, \
+         patch("asyncio.sleep", new_callable=AsyncMock):
+        mock_post.return_value = JOB_PENDING
+        mock_get.return_value = JOB_SUCCESS
+        await actions.registry_delete_tag(registry_type="ecr", image="myapp:stale")
+    body = mock_post.call_args[1]["body"] if mock_post.call_args[1] else mock_post.call_args[0][1]
+    assert body["payload"]["confirmed"] is False
+
+
+@pytest.mark.asyncio
+async def test_registry_delete_tag_forwards_gateway_id():
+    with patch("vibops_mcp.tools.actions.client.post", new_callable=AsyncMock) as mock_post, \
+         patch("vibops_mcp.tools.actions.client.get", new_callable=AsyncMock) as mock_get, \
+         patch("asyncio.sleep", new_callable=AsyncMock):
+        mock_post.return_value = JOB_PENDING
+        mock_get.return_value = JOB_SUCCESS
+        await actions.registry_delete_tag(
+            registry_type="harbor",
+            image="myproject/myapp:old-tag",
+            confirmed=True,
+            gateway_id="gw-onprem-1",
+        )
+    body = mock_post.call_args[1]["body"] if mock_post.call_args[1] else mock_post.call_args[0][1]
+    assert body["gateway_id"] == "gw-onprem-1"

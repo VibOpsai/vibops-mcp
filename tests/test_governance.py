@@ -297,3 +297,123 @@ async def test_get_job_evaluations():
         mock.return_value = []
         await governance.get_job_evaluations("job-uuid")
     mock.assert_called_once_with("/api/v1/eval/jobs/job-uuid/evaluations")
+
+
+# ── LDAP / Active Directory ───────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_get_ldap_config():
+    with patch("vibops_mcp.tools.governance.client.get", new_callable=AsyncMock) as mock:
+        mock.return_value = {"ldap_enabled": False}
+        await governance.get_ldap_config()
+    mock.assert_called_once_with("/api/v1/ldap/config")
+
+
+@pytest.mark.asyncio
+async def test_update_ldap_config_full():
+    with patch("vibops_mcp.tools.governance.client.put", new_callable=AsyncMock) as mock:
+        mock.return_value = {"ldap_enabled": True}
+        await governance.update_ldap_config(
+            ldap_server_url="ldap://dc.corp.local",
+            ldap_bind_dn="cn=svc,dc=corp,dc=local",
+            ldap_bind_password="secret",
+            ldap_search_base="ou=users,dc=corp,dc=local",
+            ldap_search_filter="(sAMAccountName={username})",
+            ldap_default_role="member",
+            ldap_jit_provisioning=True,
+            ldap_enabled=True,
+        )
+    mock.assert_called_once_with("/api/v1/ldap/config", body={
+        "ldap_server_url": "ldap://dc.corp.local",
+        "ldap_bind_dn": "cn=svc,dc=corp,dc=local",
+        "ldap_bind_password": "secret",
+        "ldap_search_base": "ou=users,dc=corp,dc=local",
+        "ldap_search_filter": "(sAMAccountName={username})",
+        "ldap_default_role": "member",
+        "ldap_jit_provisioning": True,
+        "ldap_enabled": True,
+    })
+
+
+@pytest.mark.asyncio
+async def test_update_ldap_config_partial():
+    """Omitted fields must not appear in the request body."""
+    with patch("vibops_mcp.tools.governance.client.put", new_callable=AsyncMock) as mock:
+        mock.return_value = {"ldap_enabled": False}
+        await governance.update_ldap_config(ldap_enabled=False)
+    body = mock.call_args[1]["body"]
+    assert body == {"ldap_enabled": False}
+    assert "ldap_server_url" not in body
+    assert "ldap_bind_password" not in body
+
+
+@pytest.mark.asyncio
+async def test_update_ldap_config_no_args_sends_empty_body():
+    """Calling with no arguments sends an empty body (no-op update)."""
+    with patch("vibops_mcp.tools.governance.client.put", new_callable=AsyncMock) as mock:
+        mock.return_value = {}
+        await governance.update_ldap_config()
+    mock.assert_called_once_with("/api/v1/ldap/config", body={})
+
+
+# ── SIEM push export ──────────────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_get_siem_config():
+    with patch("vibops_mcp.tools.governance.client.get", new_callable=AsyncMock) as mock:
+        mock.return_value = {"siem_provider": None, "siem_token_set": False}
+        await governance.get_siem_config()
+    mock.assert_called_once_with("/api/v1/audit/siem/config")
+
+
+@pytest.mark.asyncio
+async def test_update_siem_config_splunk():
+    with patch("vibops_mcp.tools.governance.client.put", new_callable=AsyncMock) as mock:
+        mock.return_value = {"siem_provider": "splunk", "siem_token_set": True}
+        await governance.update_siem_config(
+            siem_provider="splunk",
+            siem_endpoint="https://splunk.corp.local:8088",
+            siem_token="hec-token-xyz",
+        )
+    mock.assert_called_once_with("/api/v1/audit/siem/config", body={
+        "siem_provider": "splunk",
+        "siem_endpoint": "https://splunk.corp.local:8088",
+        "siem_token": "hec-token-xyz",
+    })
+
+
+@pytest.mark.asyncio
+async def test_update_siem_config_partial():
+    """Omitted fields not sent."""
+    with patch("vibops_mcp.tools.governance.client.put", new_callable=AsyncMock) as mock:
+        mock.return_value = {}
+        await governance.update_siem_config(siem_provider="datadog")
+    body = mock.call_args[1]["body"]
+    assert body == {"siem_provider": "datadog"}
+    assert "siem_token" not in body
+
+
+@pytest.mark.asyncio
+async def test_push_to_siem_no_filters():
+    with patch("vibops_mcp.tools.governance.client.post", new_callable=AsyncMock) as mock:
+        mock.return_value = {"pushed": 42, "provider": "splunk"}
+        await governance.push_to_siem()
+    mock.assert_called_once_with("/api/v1/audit/siem/push", params={"limit": 10000})
+
+
+@pytest.mark.asyncio
+async def test_push_to_siem_with_filters():
+    with patch("vibops_mcp.tools.governance.client.post", new_callable=AsyncMock) as mock:
+        mock.return_value = {"pushed": 5, "provider": "datadog"}
+        await governance.push_to_siem(
+            since="2026-06-01T00:00:00Z",
+            until="2026-06-15T23:59:59Z",
+            action="deploy_model",
+            limit=500,
+        )
+    mock.assert_called_once_with("/api/v1/audit/siem/push", params={
+        "since": "2026-06-01T00:00:00Z",
+        "until": "2026-06-15T23:59:59Z",
+        "action": "deploy_model",
+        "limit": 500,
+    })
