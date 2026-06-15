@@ -8,7 +8,7 @@ Large enterprises and CSPs managing GPU infrastructure deal with fragmentation �
 
 ## The solution
 
-`vibops-mcp` is a single MCP server that abstracts this complexity. One `pip install`, 59 tools, and your AI assistant can observe, operate, govern, and optimize your entire GPU fleet — regardless of where it runs.
+`vibops-mcp` is a single MCP server that abstracts this complexity. One `pip install`, 68 tools, and your AI assistant can observe, operate, govern, and optimize your entire GPU fleet — regardless of where it runs.
 
 - **Observe** — GPU utilisation, workload breakdown, MTTR, cost estimates, live K8s deployments
 - **Act** — deploy models, scale deployments, run Helm/kubectl, trigger pipelines, submit Slurm jobs

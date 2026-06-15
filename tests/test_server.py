@@ -104,14 +104,14 @@ def _registered_tool_names() -> set[str]:
 
 
 def test_all_tools_registered():
-    """All 59 expected tools must be registered on the MCP server."""
+    """All 68 expected tools must be registered on the MCP server."""
     registered = _registered_tool_names()
     missing = EXPECTED_TOOLS - registered
     assert not missing, f"Tools not registered: {missing}"
 
 
 def test_no_unexpected_tools():
-    """No extra tools should be registered beyond the expected 59."""
+    """No extra tools should be registered beyond the expected 68."""
     registered = _registered_tool_names()
     unexpected = registered - EXPECTED_TOOLS
     assert not unexpected, f"Unexpected tools registered: {unexpected}"
