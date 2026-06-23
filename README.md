@@ -8,7 +8,7 @@ Large enterprises and CSPs managing GPU infrastructure deal with fragmentation �
 
 ## The solution
 
-`vibops-mcp` is a single MCP server that abstracts this complexity. One `pip install`, 68 tools, and your AI assistant can observe, operate, govern, and optimize your entire GPU fleet — regardless of where it runs.
+`vibops-mcp` is a single MCP server that abstracts this complexity. One `pip install`, 66 tools, and your AI assistant can observe, operate, govern, and optimize your entire GPU fleet — regardless of where it runs.
 
 - **Observe** — GPU utilisation, workload breakdown, MTTR, cost estimates, live K8s deployments
 - **Act** — deploy models, scale deployments, run Helm/kubectl, trigger pipelines, submit Slurm jobs
@@ -99,7 +99,7 @@ claude mcp add vibops vibops-mcp \
 | `list_providers` | List configured AI/GPU cloud providers |
 | `list_pipelines` | List automation pipelines |
 
-### Actions (14 tools — write)
+### Actions (18 tools — write)
 
 | Tool | Description |
 |------|-------------|
@@ -117,6 +117,10 @@ claude mcp add vibops vibops-mcp \
 | `slurm_get_job_output` | Retrieve stdout/stderr of a completed Slurm job |
 | `slurm_submit_job` | Submit a new Slurm job |
 | `slurm_cancel_job` | Cancel a running or pending Slurm job |
+| `registry_list_repos` | List container registry repositories |
+| `registry_list_tags` | List tags for a container image |
+| `registry_check_image` | Check image details (size, layers, created date) |
+| `registry_delete_tag` | Delete a stale image tag (requires confirmed=True) |
 
 ### Configuration (3 tools)
 
@@ -126,7 +130,7 @@ claude mcp add vibops vibops-mcp \
 | `register_gateway` | Register a new gateway (returns one-time token) |
 | `delete_gateway` | Revoke a gateway |
 
-### Governance (22 tools)
+### Governance (25 tools)
 
 | Tool | Description |
 |------|-------------|
@@ -152,6 +156,11 @@ claude mcp add vibops vibops-mcp \
 | `list_eval_rubrics` | List LLM-as-judge evaluation rubrics |
 | `evaluate_job` | Trigger LLM-as-judge evaluation for a job |
 | `get_job_evaluations` | Retrieve evaluation results for a job |
+| `get_ldap_config` | Get LDAP / Active Directory configuration |
+| `update_ldap_config` | Configure or enable/disable LDAP integration |
+| `get_siem_config` | Get SIEM push export configuration |
+| `update_siem_config` | Set Splunk/Datadog SIEM destination |
+| `push_to_siem` | Export audit events to configured SIEM |
 
 ### FinOps (4 tools)
 
