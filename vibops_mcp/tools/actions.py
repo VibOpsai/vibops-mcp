@@ -467,3 +467,155 @@ async def slurm_cancel_job(
     if host:
         payload["host"] = host
     return await _run_job_sync("slurm_cancel_job", payload, timeout=20, gateway_id=gateway_id)
+
+
+# ── Container Registry ────────────────────────────────────────────────────────
+
+async def registry_list_repos(
+    registry_type: str,
+    registry_url: str | None = None,
+    project: str | None = None,
+    username: str | None = None,
+    password: str | None = None,
+    region: str | None = None,
+    limit: int = 50,
+    gateway_id: str | None = None,
+) -> dict:
+    """
+    List repositories in a container registry (Harbor, ECR, or Google Artifact Registry).
+
+    Args:
+        registry_type: Registry backend — "harbor", "ecr", or "gar".
+        registry_url: Harbor base URL (e.g. https://registry.acme.com) or ECR registry URI.
+        project: Harbor project name or GAR repository path prefix.
+        username: Harbor username (or "AWS" for ECR token auth).
+        password: Harbor password or registry token.
+        region: AWS region (ECR only, e.g. us-east-1).
+        limit: Maximum number of repositories to return (default 50).
+        gateway_id: Gateway UUID for the target site.
+    """
+    payload: dict = {"registry_type": registry_type, "limit": limit}
+    if registry_url:
+        payload["registry_url"] = registry_url
+    if project:
+        payload["project"] = project
+    if username:
+        payload["username"] = username
+    if password:
+        payload["password"] = password
+    if region:
+        payload["region"] = region
+    return await _run_job_sync("registry_list_repos", payload, timeout=30, gateway_id=gateway_id)
+
+
+async def registry_list_tags(
+    registry_type: str,
+    image: str,
+    registry_url: str | None = None,
+    username: str | None = None,
+    password: str | None = None,
+    region: str | None = None,
+    gateway_id: str | None = None,
+) -> dict:
+    """
+    List all tags for a specific image in a container registry.
+
+    Args:
+        registry_type: Registry backend — "harbor", "ecr", or "gar".
+        image: Image name without tag (e.g. "myproject/myapp" for Harbor, repo name for ECR).
+        registry_url: Harbor base URL or ECR registry URI.
+        username: Harbor username or registry token username.
+        password: Harbor password or registry token.
+        region: AWS region (ECR only).
+        gateway_id: Gateway UUID for the target site.
+    """
+    payload: dict = {"registry_type": registry_type, "image": image}
+    if registry_url:
+        payload["registry_url"] = registry_url
+    if username:
+        payload["username"] = username
+    if password:
+        payload["password"] = password
+    if region:
+        payload["region"] = region
+    return await _run_job_sync("registry_list_tags", payload, timeout=30, gateway_id=gateway_id)
+
+
+async def registry_check_image(
+    registry_type: str,
+    image: str,
+    registry_url: str | None = None,
+    username: str | None = None,
+    password: str | None = None,
+    region: str | None = None,
+    gateway_id: str | None = None,
+) -> dict:
+    """
+    Check whether a specific image:tag exists in a container registry.
+
+    Returns exists=True/False without raising an error when the image is absent.
+    Useful for pre-deployment checks and stale image detection.
+
+    Args:
+        registry_type: Registry backend — "harbor", "ecr", or "gar".
+        image: Image name with tag (e.g. "myproject/myapp:v1.2.3").
+        registry_url: Harbor base URL or ECR registry URI.
+        username: Harbor username or registry token username.
+        password: Harbor password or registry token.
+        region: AWS region (ECR only).
+        gateway_id: Gateway UUID for the target site.
+    """
+    payload: dict = {"registry_type": registry_type, "image": image}
+    if registry_url:
+        payload["registry_url"] = registry_url
+    if username:
+        payload["username"] = username
+    if password:
+        payload["password"] = password
+    if region:
+        payload["region"] = region
+    return await _run_job_sync("registry_check_image", payload, timeout=20, gateway_id=gateway_id)
+
+
+async def registry_delete_tag(
+    registry_type: str,
+    image: str,
+    registry_url: str | None = None,
+    username: str | None = None,
+    password: str | None = None,
+    region: str | None = None,
+    confirmed: bool = False,
+    gateway_id: str | None = None,
+) -> dict:
+    """
+    Delete an image tag from a container registry. Destructive — requires confirmed=True.
+
+    Permanently removes the specified tag. The underlying image layers are deleted
+    only if no other tag references them. Requires operator role in VibOps.
+
+    Write operation — recorded in the audit log.
+
+    Args:
+        registry_type: Registry backend — "harbor", "ecr", or "gar".
+        image: Image name with tag to delete (e.g. "myproject/myapp:old-tag").
+        registry_url: Harbor base URL or ECR registry URI.
+        username: Harbor username or registry token username.
+        password: Harbor password or registry token.
+        region: AWS region (ECR only).
+        confirmed: Must be True to proceed. Pass False (default) for a dry-run preview.
+        gateway_id: Gateway UUID for the target site.
+    """
+    payload: dict = {
+        "registry_type": registry_type,
+        "image": image,
+        "confirmed": confirmed,
+    }
+    if registry_url:
+        payload["registry_url"] = registry_url
+    if username:
+        payload["username"] = username
+    if password:
+        payload["password"] = password
+    if region:
+        payload["region"] = region
+    return await _run_job_sync("registry_delete_tag", payload, timeout=30, gateway_id=gateway_id)

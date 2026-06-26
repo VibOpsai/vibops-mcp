@@ -50,6 +50,10 @@ mcp = FastMCP(
         "- Agent dependencies: get_agent_dependency_graph for org-wide view, get_agent_dependencies for one agent.\n"
         "- Job quality: list_eval_rubrics, evaluate_job, get_job_evaluations.\n"
         "- GPU cost & waste: get_budget, get_spend_trend, get_chargeback, get_waste_analysis.\n"
+        "- LDAP / Active Directory: get_ldap_config to inspect, update_ldap_config to configure or enable/disable.\n"
+        "- SIEM push: get_siem_config to inspect, update_siem_config to set Splunk/Datadog destination, push_to_siem to export audit events.\n"
+        "- Container registry: registry_list_repos, registry_list_tags, registry_check_image for inspection; registry_delete_tag (confirmed=True) to remove stale tags.\n"
+        "- Agent inference FinOps: get_agent_usage for per-agent LLM cost attribution, get_agent_usage_detail for drill-down on a specific agent.\n"
         "- All write operations (deploy, scale, helm, kubectl, policy, identities) are recorded in the VibOps audit log.\n"
         "- VibOps jobs are infrastructure operations, not Kubernetes Jobs. Use list_jobs to review recent operations."
     ),
@@ -76,7 +80,7 @@ mcp.tool()(observation.get_cluster_rate)
 mcp.tool()(observation.list_kubectl_contexts)
 
 
-# ── Action tools (14) ─────────────────────────────────────────────────────────
+# ── Action tools (18) ─────────────────────────────────────────────────────────
 
 mcp.tool()(actions.scale_deployment)
 mcp.tool()(actions.deploy_model)
@@ -95,6 +99,12 @@ mcp.tool()(actions.slurm_get_job_output)
 mcp.tool()(actions.slurm_submit_job)
 mcp.tool()(actions.slurm_cancel_job)
 
+# Container registry
+mcp.tool()(actions.registry_list_repos)
+mcp.tool()(actions.registry_list_tags)
+mcp.tool()(actions.registry_check_image)
+mcp.tool()(actions.registry_delete_tag)
+
 
 # ── Configuration tools (3) ───────────────────────────────────────────────────
 
@@ -103,7 +113,7 @@ mcp.tool()(config.register_gateway)
 mcp.tool()(config.delete_gateway)
 
 
-# ── Governance tools (22) ─────────────────────────────────────────────────────
+# ── Governance tools (27) ─────────────────────────────────────────────────────
 
 # Anomalies
 mcp.tool()(governance.list_anomalies)
@@ -143,13 +153,31 @@ mcp.tool()(governance.list_eval_rubrics)
 mcp.tool()(governance.evaluate_job)
 mcp.tool()(governance.get_job_evaluations)
 
+# LDAP / Active Directory
+mcp.tool()(governance.get_ldap_config)
+mcp.tool()(governance.update_ldap_config)
 
-# ── FinOps tools (4) ──────────────────────────────────────────────────────────
+# SIEM push export
+mcp.tool()(governance.get_siem_config)
+mcp.tool()(governance.update_siem_config)
+mcp.tool()(governance.push_to_siem)
+
+
+# Agent model rules
+mcp.tool()(governance.get_agent_model_rules)
+mcp.tool()(governance.update_agent_model_rule)
+
+
+# ── FinOps tools (10) ─────────────────────────────────────────────────────────
 
 mcp.tool()(finops.get_budget)
 mcp.tool()(finops.get_chargeback)
 mcp.tool()(finops.get_spend_trend)
 mcp.tool()(finops.get_waste_analysis)
+mcp.tool()(finops.get_agent_usage)
+mcp.tool()(finops.get_agent_usage_detail)
+mcp.tool()(finops.get_agent_budget)
+mcp.tool()(finops.set_agent_budget)
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────

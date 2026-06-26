@@ -48,6 +48,11 @@ EXPECTED_TOOLS = {
     "set_cluster_rate",
     "register_gateway",
     "delete_gateway",
+    # Actions — Container Registry (4)
+    "registry_list_repos",
+    "registry_list_tags",
+    "registry_check_image",
+    "registry_delete_tag",
     # Governance (22)
     "list_anomalies",
     "get_open_anomalies",
@@ -71,6 +76,12 @@ EXPECTED_TOOLS = {
     "list_eval_rubrics",
     "evaluate_job",
     "get_job_evaluations",
+    # Governance — Sprint 6 (5)
+    "get_ldap_config",
+    "update_ldap_config",
+    "get_siem_config",
+    "update_siem_config",
+    "push_to_siem",
     # FinOps (4)
     "get_budget",
     "get_chargeback",
@@ -93,14 +104,14 @@ def _registered_tool_names() -> set[str]:
 
 
 def test_all_tools_registered():
-    """All 59 expected tools must be registered on the MCP server."""
+    """All 68 expected tools must be registered on the MCP server."""
     registered = _registered_tool_names()
     missing = EXPECTED_TOOLS - registered
     assert not missing, f"Tools not registered: {missing}"
 
 
 def test_no_unexpected_tools():
-    """No extra tools should be registered beyond the expected 59."""
+    """No extra tools should be registered beyond the expected 68."""
     registered = _registered_tool_names()
     unexpected = registered - EXPECTED_TOOLS
     assert not unexpected, f"Unexpected tools registered: {unexpected}"

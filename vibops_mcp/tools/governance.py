@@ -414,3 +414,183 @@ async def get_job_evaluations(job_id: str) -> dict:
         job_id: UUID of the job (from list_jobs or get_job).
     """
     return await client.get(f"/api/v1/eval/jobs/{job_id}/evaluations")
+
+
+# ── LDAP / Active Directory ───────────────────────────────────────────────────
+
+async def get_ldap_config() -> dict:
+    """
+    Return the LDAP / Active Directory authentication configuration for the
+    current organisation.
+
+    Shows whether LDAP is enabled, the server URL, bind DN, search base,
+    search filter, JIT provisioning flag, and default role. The bind password
+    is never returned — ldap_bind_password_set indicates whether one is stored.
+    """
+    return await client.get("/api/v1/ldap/config")
+
+
+async def update_ldap_config(
+    ldap_server_url: str | None = None,
+    ldap_bind_dn: str | None = None,
+    ldap_bind_password: str | None = None,
+    ldap_search_base: str | None = None,
+    ldap_search_filter: str | None = None,
+    ldap_default_role: str | None = None,
+    ldap_jit_provisioning: bool | None = None,
+    ldap_enabled: bool | None = None,
+) -> dict:
+    """
+    Update the LDAP / Active Directory configuration for the current organisation.
+
+    Only supplied fields are updated — omitted fields are left unchanged.
+    To enable LDAP (ldap_enabled=True), ldap_server_url, ldap_bind_dn,
+    ldap_bind_password, and ldap_search_base must already be set (or provided
+    in the same call). Requires org_admin role.
+
+    Search filter examples:
+      OpenLDAP  : (uid={username})
+      Active Directory: (sAMAccountName={username})
+      Azure AD on-prem: (userPrincipalName={username}@domain.com)
+
+    Args:
+        ldap_server_url: LDAP server URL, e.g. ldap://dc.corp.local or ldaps://dc.corp.local.
+        ldap_bind_dn: Service account DN, e.g. cn=svc-vibops,ou=users,dc=corp,dc=local.
+        ldap_bind_password: Service account password (stored Fernet-encrypted).
+        ldap_search_base: Search base DN, e.g. ou=users,dc=corp,dc=local.
+        ldap_search_filter: User search filter with {username} placeholder (default: (uid={username})).
+        ldap_default_role: Role assigned to JIT-provisioned users — member, admin, or viewer.
+        ldap_jit_provisioning: If True, unknown users are auto-provisioned on first login.
+        ldap_enabled: Set True to activate LDAP login, False to disable without clearing config.
+    """
+    body: dict = {}
+    if ldap_server_url is not None:
+        body["ldap_server_url"] = ldap_server_url
+    if ldap_bind_dn is not None:
+        body["ldap_bind_dn"] = ldap_bind_dn
+    if ldap_bind_password is not None:
+        body["ldap_bind_password"] = ldap_bind_password
+    if ldap_search_base is not None:
+        body["ldap_search_base"] = ldap_search_base
+    if ldap_search_filter is not None:
+        body["ldap_search_filter"] = ldap_search_filter
+    if ldap_default_role is not None:
+        body["ldap_default_role"] = ldap_default_role
+    if ldap_jit_provisioning is not None:
+        body["ldap_jit_provisioning"] = ldap_jit_provisioning
+    if ldap_enabled is not None:
+        body["ldap_enabled"] = ldap_enabled
+    return await client.put("/api/v1/ldap/config", body=body)
+
+
+# ── SIEM push export ──────────────────────────────────────────────────────────
+
+async def get_siem_config() -> dict:
+    """
+    Return the SIEM push export configuration for the current organisation.
+
+    Shows the configured provider (splunk or datadog), the destination endpoint,
+    and whether a token is stored. The token itself is never returned.
+    """
+    return await client.get("/api/v1/audit/siem/config")
+
+
+async def update_siem_config(
+    siem_provider: str | None = None,
+    siem_endpoint: str | None = None,
+    siem_token: str | None = None,
+) -> dict:
+    """
+    Configure the SIEM push export destination for the current organisation.
+
+    Only supplied fields are updated. Requires org_admin role.
+
+    Splunk:  siem_provider="splunk",  siem_endpoint="https://splunk.corp.local:8088",
+             siem_token="<HEC token>"
+    Datadog: siem_provider="datadog", siem_endpoint="datadoghq.com" (or datadoghq.eu),
+             siem_token="<DD API key>"
+
+    Once configured, use push_to_siem to push audit events on demand.
+
+    Args:
+        siem_provider: Destination type — "splunk" or "datadog".
+        siem_endpoint: Splunk HEC base URL or Datadog site (e.g. datadoghq.com).
+        siem_token: Splunk HEC token or Datadog API key (stored Fernet-encrypted).
+    """
+    body: dict = {}
+    if siem_provider is not None:
+        body["siem_provider"] = siem_provider
+    if siem_endpoint is not None:
+        body["siem_endpoint"] = siem_endpoint
+    if siem_token is not None:
+        body["siem_token"] = siem_token
+    return await client.put("/api/v1/audit/siem/config", body=body)
+
+
+async def push_to_siem(
+    since: str | None = None,
+    until: str | None = None,
+    action: str | None = None,
+    limit: int = 10000,
+) -> dict:
+    """
+    Push audit log events to the configured SIEM (Splunk HEC or Datadog Logs API).
+
+    Sends matching audit rows to the SIEM in a single batched request.
+    Returns the number of events pushed and the provider used.
+    Requires org_admin role and a configured SIEM destination (update_siem_config).
+
+    The pull-based export (GET /audit/export?format=cef|leef|json) remains
+    available as an alternative for batch ingestion.
+
+    Args:
+        since: ISO 8601 start timestamp (e.g. 2026-06-01T00:00:00Z). Defaults to all history.
+        until: ISO 8601 end timestamp. Defaults to now.
+        action: Filter by action name (e.g. "scale_cluster", "deploy_model").
+        limit: Maximum number of events to push (default 10 000).
+    """
+    params: dict = {"limit": limit}
+    if since:
+        params["since"] = since
+    if until:
+        params["until"] = until
+    if action:
+        params["action"] = action
+    return await client.post("/api/v1/audit/siem/push", params=params)
+
+
+async def get_agent_model_rules() -> dict:
+    """
+    List all active agent model access rules for the organisation.
+
+    Rules control which LLM models each agent is allowed to use. Uses glob
+    patterns for agent_id matching (e.g. "data-pipeline-*") and model matching
+    (e.g. "llama-*"). Deny takes precedence over allow.
+    """
+    return await client.get("/api/v1/policy/agent-model-rules")
+
+
+async def update_agent_model_rule(
+    agent_id_pattern: str,
+    allowed_models: list[str] | None = None,
+    denied_models: list[str] | None = None,
+) -> dict:
+    """
+    Create a new agent model access rule. Controls which LLM models an agent
+    can use through the VibOps LLM proxy.
+
+    Examples:
+    - Allow pricing agents only Llama models: pattern="pricing-*", allowed=["llama-*"]
+    - Block all agents from GPT-4o: pattern="*", denied=["gpt-4o*"]
+
+    Args:
+        agent_id_pattern: Glob pattern matching agent IDs (e.g. "pricing-*", "*").
+        allowed_models: List of model glob patterns the agent MAY use. Empty = all allowed.
+        denied_models: List of model glob patterns the agent MUST NOT use. Deny overrides allow.
+    """
+    body: dict = {"agent_id_pattern": agent_id_pattern}
+    if allowed_models is not None:
+        body["allowed_models"] = allowed_models
+    if denied_models is not None:
+        body["denied_models"] = denied_models
+    return await client.post("/api/v1/policy/agent-model-rules", json=body)

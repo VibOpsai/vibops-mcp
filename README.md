@@ -8,7 +8,7 @@ Large enterprises and CSPs managing GPU infrastructure deal with fragmentation �
 
 ## The solution
 
-`vibops-mcp` is a single MCP server that abstracts this complexity. One `pip install`, 59 tools, and your AI assistant can observe, operate, govern, and optimize your entire GPU fleet — regardless of where it runs.
+`vibops-mcp` is a single MCP server that abstracts this complexity. One `pip install`, 70 tools, and your AI assistant can observe, operate, govern, and optimize your entire GPU fleet — regardless of where it runs.
 
 - **Observe** — GPU utilisation, workload breakdown, MTTR, cost estimates, live K8s deployments
 - **Act** — deploy models, scale deployments, run Helm/kubectl, trigger pipelines, submit Slurm jobs
@@ -99,7 +99,7 @@ claude mcp add vibops vibops-mcp \
 | `list_providers` | List configured AI/GPU cloud providers |
 | `list_pipelines` | List automation pipelines |
 
-### Actions (14 tools — write)
+### Actions (18 tools — write)
 
 | Tool | Description |
 |------|-------------|
@@ -117,6 +117,10 @@ claude mcp add vibops vibops-mcp \
 | `slurm_get_job_output` | Retrieve stdout/stderr of a completed Slurm job |
 | `slurm_submit_job` | Submit a new Slurm job |
 | `slurm_cancel_job` | Cancel a running or pending Slurm job |
+| `registry_list_repos` | List container registry repositories |
+| `registry_list_tags` | List tags for a container image |
+| `registry_check_image` | Check image details (size, layers, created date) |
+| `registry_delete_tag` | Delete a stale image tag (requires confirmed=True) |
 
 ### Configuration (3 tools)
 
@@ -126,7 +130,7 @@ claude mcp add vibops vibops-mcp \
 | `register_gateway` | Register a new gateway (returns one-time token) |
 | `delete_gateway` | Revoke a gateway |
 
-### Governance (22 tools)
+### Governance (25 tools)
 
 | Tool | Description |
 |------|-------------|
@@ -152,8 +156,13 @@ claude mcp add vibops vibops-mcp \
 | `list_eval_rubrics` | List LLM-as-judge evaluation rubrics |
 | `evaluate_job` | Trigger LLM-as-judge evaluation for a job |
 | `get_job_evaluations` | Retrieve evaluation results for a job |
+| `get_ldap_config` | Get LDAP / Active Directory configuration |
+| `update_ldap_config` | Configure or enable/disable LDAP integration |
+| `get_siem_config` | Get SIEM push export configuration |
+| `update_siem_config` | Set Splunk/Datadog SIEM destination |
+| `push_to_siem` | Export audit events to configured SIEM |
 
-### FinOps (4 tools)
+### FinOps (6 tools)
 
 | Tool | Description |
 |------|-------------|
@@ -161,6 +170,33 @@ claude mcp add vibops vibops-mcp \
 | `get_chargeback` | Get chargeback breakdown by tenant for a given month |
 | `get_spend_trend` | Get daily GPU spend trend (default: last 30 days) |
 | `get_waste_analysis` | Identify idle GPU resources and cost optimisation opportunities |
+| `get_agent_usage` | Get LLM inference cost per agent — token consumption, GPU cost, request counts |
+| `get_agent_usage_detail` | Detailed inference usage for a specific agent — daily breakdown, model distribution |
+
+## LLM Inference Proxy
+
+VibOps includes a transparent OpenAI-compatible proxy (port 8004) that sits between your AI agents and LLM inference servers (vLLM, Ollama, TGI). Every inference request is logged with agent attribution for FinOps.
+
+Your agents point to the proxy instead of the LLM directly:
+
+```
+# Before
+OPENAI_BASE_URL=http://vllm:8000/v1
+
+# After
+OPENAI_BASE_URL=http://vibops-proxy:8004/v1
+```
+
+Add a `X-VibOps-Agent-Id` header to attribute costs per agent:
+
+```bash
+curl -X POST http://vibops-proxy:8004/v1/chat/completions \
+  -H "X-VibOps-Agent-Id: pricing-agent-v2" \
+  -H "X-VibOps-Team: supply-chain" \
+  -d '{"model": "mistral:7b", "messages": [...]}'
+```
+
+The proxy captures: agent ID, team, model, tokens, latency, GPU cost — visible in the console FinOps dashboard and queryable via `get_agent_usage`.
 
 ## Example prompts
 
@@ -178,6 +214,9 @@ claude mcp add vibops vibops-mcp \
 "Show me the spend trend for the last 7 days and flag any waste."
 "Create a machine identity for the pricing-agent with a 1-year expiry."
 "Which agents depend on the claude-opus-4-6 model?"
+"Which agent costs the most in GPU this month?"
+"Show me the inference cost breakdown for the pricing agent."
+"What's the GPU spend per team for the last 7 days?"
 ```
 
 ## Contributing
