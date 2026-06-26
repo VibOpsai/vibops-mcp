@@ -97,6 +97,44 @@ async def get_agent_usage_detail(agent_id: str) -> dict:
     return await client.get(f"/api/v1/finops/agent-usage/{agent_id}")
 
 
+async def get_agent_budget(agent_id: str) -> dict:
+    """
+    Return the inference budget for a specific agent — monthly limit, current spend,
+    and enforcement action (reject/warn).
+
+    Args:
+        agent_id: The agent identifier.
+    """
+    return await client.get(f"/api/v1/finops/agent-budgets/{agent_id}")
+
+
+async def set_agent_budget(
+    agent_id: str,
+    monthly_limit_usd: float,
+    soft_cap_pct: float = 80.0,
+    hard_cap_pct: float = 100.0,
+    action: str = "reject",
+) -> dict:
+    """
+    Set or update the monthly inference budget for an agent. When the agent
+    exceeds the hard cap, the LLM proxy blocks further requests (429).
+
+    Args:
+        agent_id: The agent identifier.
+        monthly_limit_usd: Monthly spend limit in USD.
+        soft_cap_pct: Percentage at which a warning is emitted (default 80).
+        hard_cap_pct: Percentage at which requests are blocked (default 100).
+        action: Enforcement action at hard cap — "reject" (default) or "warn".
+    """
+    return await client.post("/api/v1/finops/agent-budgets", json={
+        "agent_id": agent_id,
+        "monthly_limit_usd": monthly_limit_usd,
+        "soft_cap_pct": soft_cap_pct,
+        "hard_cap_pct": hard_cap_pct,
+        "action": action,
+    })
+
+
 async def get_waste_analysis() -> dict:
     """
     Return GPU waste analysis — idle resources consuming budget without doing work.

@@ -557,3 +557,40 @@ async def push_to_siem(
     if action:
         params["action"] = action
     return await client.post("/api/v1/audit/siem/push", params=params)
+
+
+async def get_agent_model_rules() -> dict:
+    """
+    List all active agent model access rules for the organisation.
+
+    Rules control which LLM models each agent is allowed to use. Uses glob
+    patterns for agent_id matching (e.g. "data-pipeline-*") and model matching
+    (e.g. "llama-*"). Deny takes precedence over allow.
+    """
+    return await client.get("/api/v1/policy/agent-model-rules")
+
+
+async def update_agent_model_rule(
+    agent_id_pattern: str,
+    allowed_models: list[str] | None = None,
+    denied_models: list[str] | None = None,
+) -> dict:
+    """
+    Create a new agent model access rule. Controls which LLM models an agent
+    can use through the VibOps LLM proxy.
+
+    Examples:
+    - Allow pricing agents only Llama models: pattern="pricing-*", allowed=["llama-*"]
+    - Block all agents from GPT-4o: pattern="*", denied=["gpt-4o*"]
+
+    Args:
+        agent_id_pattern: Glob pattern matching agent IDs (e.g. "pricing-*", "*").
+        allowed_models: List of model glob patterns the agent MAY use. Empty = all allowed.
+        denied_models: List of model glob patterns the agent MUST NOT use. Deny overrides allow.
+    """
+    body: dict = {"agent_id_pattern": agent_id_pattern}
+    if allowed_models is not None:
+        body["allowed_models"] = allowed_models
+    if denied_models is not None:
+        body["denied_models"] = denied_models
+    return await client.post("/api/v1/policy/agent-model-rules", json=body)

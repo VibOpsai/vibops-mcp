@@ -113,7 +113,7 @@ mcp.tool()(config.register_gateway)
 mcp.tool()(config.delete_gateway)
 
 
-# ── Governance tools (25) ─────────────────────────────────────────────────────
+# ── Governance tools (27) ─────────────────────────────────────────────────────
 
 # Anomalies
 mcp.tool()(governance.list_anomalies)
@@ -163,7 +163,12 @@ mcp.tool()(governance.update_siem_config)
 mcp.tool()(governance.push_to_siem)
 
 
-# ── FinOps tools (6) ──────────────────────────────────────────────────────────
+# Agent model rules
+mcp.tool()(governance.get_agent_model_rules)
+mcp.tool()(governance.update_agent_model_rule)
+
+
+# ── FinOps tools (10) ─────────────────────────────────────────────────────────
 
 mcp.tool()(finops.get_budget)
 mcp.tool()(finops.get_chargeback)
@@ -171,6 +176,8 @@ mcp.tool()(finops.get_spend_trend)
 mcp.tool()(finops.get_waste_analysis)
 mcp.tool()(finops.get_agent_usage)
 mcp.tool()(finops.get_agent_usage_detail)
+mcp.tool()(finops.get_agent_budget)
+mcp.tool()(finops.set_agent_budget)
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
