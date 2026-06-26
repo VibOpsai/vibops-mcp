@@ -53,6 +53,7 @@ mcp = FastMCP(
         "- LDAP / Active Directory: get_ldap_config to inspect, update_ldap_config to configure or enable/disable.\n"
         "- SIEM push: get_siem_config to inspect, update_siem_config to set Splunk/Datadog destination, push_to_siem to export audit events.\n"
         "- Container registry: registry_list_repos, registry_list_tags, registry_check_image for inspection; registry_delete_tag (confirmed=True) to remove stale tags.\n"
+        "- Agent inference FinOps: get_agent_usage for per-agent LLM cost attribution, get_agent_usage_detail for drill-down on a specific agent.\n"
         "- All write operations (deploy, scale, helm, kubectl, policy, identities) are recorded in the VibOps audit log.\n"
         "- VibOps jobs are infrastructure operations, not Kubernetes Jobs. Use list_jobs to review recent operations."
     ),
@@ -162,12 +163,14 @@ mcp.tool()(governance.update_siem_config)
 mcp.tool()(governance.push_to_siem)
 
 
-# ── FinOps tools (4) ──────────────────────────────────────────────────────────
+# ── FinOps tools (6) ──────────────────────────────────────────────────────────
 
 mcp.tool()(finops.get_budget)
 mcp.tool()(finops.get_chargeback)
 mcp.tool()(finops.get_spend_trend)
 mcp.tool()(finops.get_waste_analysis)
+mcp.tool()(finops.get_agent_usage)
+mcp.tool()(finops.get_agent_usage_detail)
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
