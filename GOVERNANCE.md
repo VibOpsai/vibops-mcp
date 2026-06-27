@@ -27,6 +27,6 @@ vibops-mcp follows [Semantic Versioning](https://semver.org):
 
 ## Contact
 
-For security issues, contact [security@vibops.io](mailto:security@vibops.io) — do not open a public issue.
+For security issues, contact [security@vibops.ai](mailto:security@vibops.ai) — do not open a public issue.
 
-For everything else: [hello@vibops.io](mailto:hello@vibops.io)
+For everything else: [hello@vibops.ai](mailto:hello@vibops.ai)

@@ -227,4 +227,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). All contributions require a DCO sign-off
 
 MIT — free to use, modify, and distribute. See [LICENSE](LICENSE).
 
-Built on [FastMCP](https://github.com/jlowin/fastmcp) and the [VibOps](https://vibops.io) platform.
+Built on [FastMCP](https://github.com/jlowin/fastmcp) and the [VibOps](https://vibops.ai) platform.
