@@ -1,6 +1,6 @@
 # Contributing to vibops-mcp
 
-Thank you for your interest in contributing! vibops-mcp is an open MCP server for GPU infrastructure management, maintained by [VibOps](https://vibops.io).
+Thank you for your interest in contributing! vibops-mcp is an open MCP server for GPU infrastructure management, maintained by [VibOps](https://vibops.ai).
 
 ## Ways to contribute
 
@@ -61,4 +61,4 @@ export VIBOPS_TOKEN=vbops_xxx   # create one in VibOps → Admin → API Tokens
 
 ## Questions
 
-Open an issue or reach out at [hello@vibops.io](mailto:hello@vibops.io).
+Open an issue or reach out at [hello@vibops.ai](mailto:hello@vibops.ai).

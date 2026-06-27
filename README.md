@@ -8,7 +8,7 @@ Large enterprises and CSPs managing GPU infrastructure deal with fragmentation �
 
 ## The solution
 
-`vibops-mcp` is a single MCP server that abstracts this complexity. One `pip install`, 74 tools, and your AI assistant can observe, operate, govern, and optimize your entire GPU fleet — regardless of where it runs.
+`vibops-mcp` is a single MCP server that abstracts this complexity. One `pip install`, 70 tools, and your AI assistant can observe, operate, govern, and optimize your entire GPU fleet — regardless of where it runs.
 
 - **Observe** — GPU utilisation, workload breakdown, MTTR, cost estimates, live K8s deployments
 - **Act** — deploy models, scale deployments, run Helm/kubectl, trigger pipelines, submit Slurm jobs
@@ -130,7 +130,7 @@ claude mcp add vibops vibops-mcp \
 | `register_gateway` | Register a new gateway (returns one-time token) |
 | `delete_gateway` | Revoke a gateway |
 
-### Governance (27 tools)
+### Governance (25 tools)
 
 | Tool | Description |
 |------|-------------|
@@ -161,10 +161,8 @@ claude mcp add vibops vibops-mcp \
 | `get_siem_config` | Get SIEM push export configuration |
 | `update_siem_config` | Set Splunk/Datadog SIEM destination |
 | `push_to_siem` | Export audit events to configured SIEM |
-| `get_agent_model_rules` | List agent model access control rules (which agent can use which LLM) |
-| `update_agent_model_rule` | Create a model access rule for agents (glob patterns, deny-first) |
 
-### FinOps (10 tools)
+### FinOps (6 tools)
 
 | Tool | Description |
 |------|-------------|
@@ -174,8 +172,6 @@ claude mcp add vibops vibops-mcp \
 | `get_waste_analysis` | Identify idle GPU resources and cost optimisation opportunities |
 | `get_agent_usage` | Get LLM inference cost per agent — token consumption, GPU cost, request counts |
 | `get_agent_usage_detail` | Detailed inference usage for a specific agent — daily breakdown, model distribution |
-| `get_agent_budget` | Get current budget and spend for a specific agent |
-| `set_agent_budget` | Set monthly spend limit for an agent (soft alert + hard block) |
 
 ## LLM Inference Proxy
 

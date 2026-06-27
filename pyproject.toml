@@ -32,7 +32,7 @@ dev = [
 vibops-mcp = "vibops_mcp.server:main"
 
 [project.urls]
-Homepage = "https://vibops.io"
+Homepage = "https://vibops.ai"
 Repository = "https://github.com/VibOpsai/vibops-mcp"
 Issues = "https://github.com/VibOpsai/vibops-mcp/issues"
 
