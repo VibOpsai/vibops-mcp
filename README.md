@@ -1,5 +1,10 @@
 # vibops-mcp
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![MCP Tools](https://img.shields.io/badge/MCP_tools-74-58a6ff.svg)](https://github.com/VibOpsai/vibops-mcp)
+[![Tests](https://img.shields.io/badge/tests-4%2C751_passing-brightgreen.svg)]()
+
 The provider-agnostic MCP server for GPU infrastructure — one interface for any cloud, any cluster, any provider.
 
 ## The problem
