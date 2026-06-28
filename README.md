@@ -130,7 +130,30 @@ claude mcp add vibops vibops-mcp \
 | `register_gateway` | Register a new gateway (returns one-time token) |
 | `delete_gateway` | Revoke a gateway |
 
-### Governance (25 tools)
+### Agent Infrastructure Control Plane (12 tools)
+
+The missing layer between your AI agents and your GPU fleet. Works with any framework (n8n, LangChain, CrewAI, Dify) — just point to the VibOps LLM Proxy.
+
+| Tool | Description |
+|------|-------------|
+| **FinOps per agent** | |
+| `get_agent_usage` | GPU cost per agent — tokens, requests, cost, GPU-hours. *"Which agent costs the most?"* |
+| `get_agent_usage_detail` | Drill-down on one agent — daily breakdown, model distribution, cost trend |
+| `get_agent_budget` | Current budget + MTD spend for an agent |
+| `set_agent_budget` | Set monthly spend limit — soft alert at 80%, hard block at 100% (HTTP 429) |
+| **Model access control** | |
+| `get_agent_model_rules` | List model access rules — which agent can use which LLM |
+| `update_agent_model_rule` | Create a rule: glob patterns, deny-first. *"RH agents → Mistral only"* |
+| **Identity lifecycle** | |
+| `list_agent_identities` | List machine identities for agents |
+| `create_agent_identity` | Create a new machine identity (key shown once) |
+| `rotate_agent_identity` | Rotate the key for an existing identity |
+| `revoke_agent_identity` | Revoke an identity immediately |
+| **Dependency graph** | |
+| `get_agent_dependency_graph` | Full org-wide graph: agent→model, agent→connector, agent→sub-agent |
+| `get_agent_dependencies` | Dependencies for one agent — impact analysis before migration |
+
+### Governance & Compliance (21 tools)
 
 | Tool | Description |
 |------|-------------|
@@ -147,12 +170,6 @@ claude mcp add vibops vibops-mcp \
 | `verify_audit_chain` | Verify HMAC-SHA256 integrity of the full audit chain |
 | `get_policy` | Get the current organisation policy |
 | `update_policy` | Replace the organisation policy (immediate effect) |
-| `list_agent_identities` | List machine identities for agents |
-| `create_agent_identity` | Create a new machine identity (key shown once) |
-| `rotate_agent_identity` | Rotate the key for an existing identity |
-| `revoke_agent_identity` | Revoke an identity immediately |
-| `get_agent_dependency_graph` | Get the full org-wide agent dependency graph |
-| `get_agent_dependencies` | Get dependencies for a specific agent |
 | `list_eval_rubrics` | List LLM-as-judge evaluation rubrics |
 | `evaluate_job` | Trigger LLM-as-judge evaluation for a job |
 | `get_job_evaluations` | Retrieve evaluation results for a job |
@@ -162,16 +179,14 @@ claude mcp add vibops vibops-mcp \
 | `update_siem_config` | Set Splunk/Datadog SIEM destination |
 | `push_to_siem` | Export audit events to configured SIEM |
 
-### FinOps (6 tools)
+### GPU FinOps (4 tools)
 
 | Tool | Description |
 |------|-------------|
-| `get_budget` | Get current budget and consumed spend |
+| `get_budget` | Get current GPU budget and consumed spend |
 | `get_chargeback` | Get chargeback breakdown by tenant for a given month |
 | `get_spend_trend` | Get daily GPU spend trend (default: last 30 days) |
 | `get_waste_analysis` | Identify idle GPU resources and cost optimisation opportunities |
-| `get_agent_usage` | Get LLM inference cost per agent — token consumption, GPU cost, request counts |
-| `get_agent_usage_detail` | Detailed inference usage for a specific agent — daily breakdown, model distribution |
 
 ## LLM Inference Proxy
 
