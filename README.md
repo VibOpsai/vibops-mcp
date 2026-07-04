@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/vibopsai-vibops-mcp-badge.png)](https://mseep.ai/app/vibopsai-vibops-mcp)
+
 # vibops-mcp
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
