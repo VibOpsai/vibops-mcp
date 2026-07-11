@@ -619,3 +619,76 @@ async def registry_delete_tag(
     if region:
         payload["region"] = region
     return await _run_job_sync("registry_delete_tag", payload, timeout=30, gateway_id=gateway_id)
+
+
+# ── VM / Hypervisor actions ──────────────────────────────────────────────────
+
+async def proxmox_list_vms(
+    node: str | None = None,
+    status: str = "all",
+    gateway_id: str | None = None,
+) -> dict:
+    """List all VMs on a Proxmox cluster. Filter by node or status (running/stopped/all)."""
+    payload: dict = {}
+    if node:
+        payload["node"] = node
+    if status != "all":
+        payload["status"] = status
+    return await _run_job_sync("proxmox_list_vms", payload, gateway_id=gateway_id)
+
+
+async def proxmox_start_vm(vmid: int, node: str, gateway_id: str | None = None) -> dict:
+    """Start a stopped Proxmox VM."""
+    return await _run_job_sync("proxmox_start_vm", {"vmid": vmid, "node": node}, gateway_id=gateway_id)
+
+
+async def proxmox_stop_vm(vmid: int, node: str, gateway_id: str | None = None) -> dict:
+    """Gracefully shutdown a running Proxmox VM."""
+    return await _run_job_sync("proxmox_stop_vm", {"vmid": vmid, "node": node}, gateway_id=gateway_id)
+
+
+async def proxmox_migrate_vm(
+    vmid: int, node: str, target: str,
+    online: bool = True, gateway_id: str | None = None,
+) -> dict:
+    """Live-migrate a Proxmox VM to another node."""
+    return await _run_job_sync("proxmox_migrate_vm", {
+        "vmid": vmid, "node": node, "target": target, "online": online,
+    }, gateway_id=gateway_id)
+
+
+async def proxmox_create_snapshot(vmid: int, node: str, name: str, gateway_id: str | None = None) -> dict:
+    """Create a snapshot of a Proxmox VM."""
+    return await _run_job_sync("proxmox_create_snapshot", {
+        "vmid": vmid, "node": node, "name": name,
+    }, gateway_id=gateway_id)
+
+
+async def xo_list_vms(power_state: str = "all", gateway_id: str | None = None) -> dict:
+    """List all VMs on XCP-ng pools managed by Xen Orchestra."""
+    payload: dict = {}
+    if power_state != "all":
+        payload["power_state"] = power_state
+    return await _run_job_sync("xo_list_vms", payload, gateway_id=gateway_id)
+
+
+async def xo_start_vm(vm_id: str, gateway_id: str | None = None) -> dict:
+    """Start a halted XCP-ng VM."""
+    return await _run_job_sync("xo_start_vm", {"vm_id": vm_id}, gateway_id=gateway_id)
+
+
+async def xo_stop_vm(vm_id: str, gateway_id: str | None = None) -> dict:
+    """Cleanly shutdown a running XCP-ng VM."""
+    return await _run_job_sync("xo_stop_vm", {"vm_id": vm_id}, gateway_id=gateway_id)
+
+
+async def xo_migrate_vm(vm_id: str, target_host_id: str, gateway_id: str | None = None) -> dict:
+    """Live-migrate an XCP-ng VM to another host."""
+    return await _run_job_sync("xo_migrate_vm", {
+        "vm_id": vm_id, "target_host_id": target_host_id,
+    }, gateway_id=gateway_id)
+
+
+async def xo_snapshot_vm(vm_id: str, name: str, gateway_id: str | None = None) -> dict:
+    """Create a snapshot of an XCP-ng VM."""
+    return await _run_job_sync("xo_snapshot_vm", {"vm_id": vm_id, "name": name}, gateway_id=gateway_id)

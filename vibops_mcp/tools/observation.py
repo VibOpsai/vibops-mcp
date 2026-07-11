@@ -247,3 +247,12 @@ async def get_job_metrics(hours: int = 24) -> dict:
         hours: Look-back window in hours (default 24, max 720).
     """
     return await client.get("/api/v1/metrics/jobs", params={"hours": hours})
+
+
+async def get_vm_usage() -> dict:
+    """Get VM cost attribution across all hypervisors.
+
+    Returns per-VM cost estimate based on allocated vCPU, RAM, and disk.
+    Includes hourly and monthly costs, sorted by most expensive first.
+    """
+    return await client.get("/api/v1/finops/vm-usage")
