@@ -692,3 +692,95 @@ async def xo_migrate_vm(vm_id: str, target_host_id: str, gateway_id: str | None 
 async def xo_snapshot_vm(vm_id: str, name: str, gateway_id: str | None = None) -> dict:
     """Create a snapshot of an XCP-ng VM."""
     return await _run_job_sync("xo_snapshot_vm", {"vm_id": vm_id, "name": name}, gateway_id=gateway_id)
+
+
+# ── VMware vSphere actions ───────────────────────────────────────────────────
+
+async def vsphere_list_vms(
+    power_state: str = "all",
+    datacenter: str | None = None,
+    cluster: str | None = None,
+    gateway_id: str | None = None,
+) -> dict:
+    """List all VMs in the vCenter inventory. Filter by power_state (all/poweredOn/poweredOff/suspended), datacenter, or cluster."""
+    payload: dict = {}
+    if power_state != "all":
+        payload["power_state"] = power_state
+    if datacenter:
+        payload["datacenter"] = datacenter
+    if cluster:
+        payload["cluster"] = cluster
+    return await _run_job_sync("vsphere_list_vms", payload, gateway_id=gateway_id)
+
+
+async def vsphere_get_vm(name: str, gateway_id: str | None = None) -> dict:
+    """Get detailed information about a specific vSphere VM by name."""
+    return await _run_job_sync("vsphere_get_vm", {"name": name}, gateway_id=gateway_id)
+
+
+async def vsphere_start_vm(name: str, gateway_id: str | None = None) -> dict:
+    """Power on a vSphere VM."""
+    return await _run_job_sync("vsphere_start_vm", {"name": name}, gateway_id=gateway_id)
+
+
+async def vsphere_stop_vm(
+    name: str,
+    force: bool = False,
+    gateway_id: str | None = None,
+) -> dict:
+    """Shut down a vSphere VM. Attempts guest shutdown via VMware Tools by default; set force=True for immediate hard power-off."""
+    return await _run_job_sync("vsphere_stop_vm", {"name": name, "force": force}, gateway_id=gateway_id)
+
+
+async def vsphere_restart_vm(
+    name: str,
+    force: bool = False,
+    gateway_id: str | None = None,
+) -> dict:
+    """Restart a vSphere VM. Attempts guest reboot via VMware Tools by default; set force=True for immediate hard reset."""
+    return await _run_job_sync("vsphere_restart_vm", {"name": name, "force": force}, gateway_id=gateway_id)
+
+
+async def vsphere_migrate_vm(
+    name: str,
+    target_host: str,
+    dry_run: bool = False,
+    gateway_id: str | None = None,
+) -> dict:
+    """Live-migrate (vMotion) a vSphere VM to another ESXi host. Set dry_run=True to validate without moving."""
+    return await _run_job_sync("vsphere_migrate_vm", {
+        "name": name, "target_host": target_host, "dry_run": dry_run,
+    }, gateway_id=gateway_id)
+
+
+async def vsphere_create_snapshot(
+    name: str,
+    snapshot_name: str,
+    description: str = "",
+    memory: bool = False,
+    gateway_id: str | None = None,
+) -> dict:
+    """Create a snapshot of a vSphere VM. Quiescing is attempted automatically when VMware Tools is running."""
+    return await _run_job_sync("vsphere_create_snapshot", {
+        "name": name, "snapshot_name": snapshot_name,
+        "description": description, "memory": memory,
+    }, gateway_id=gateway_id)
+
+
+async def vsphere_list_hosts(
+    datacenter: str | None = None,
+    cluster: str | None = None,
+    gateway_id: str | None = None,
+) -> dict:
+    """List all ESXi hosts in the vCenter inventory with CPU, memory, and connection state."""
+    payload: dict = {}
+    if datacenter:
+        payload["datacenter"] = datacenter
+    if cluster:
+        payload["cluster"] = cluster
+    return await _run_job_sync("vsphere_list_hosts", payload, gateway_id=gateway_id)
+
+
+async def vsphere_get_vm_metrics(name: str, gateway_id: str | None = None) -> dict:
+    """Get real-time CPU, memory, disk, and network metrics for a vSphere VM."""
+    return await _run_job_sync("vsphere_get_vm_metrics", {"name": name}, gateway_id=gateway_id)

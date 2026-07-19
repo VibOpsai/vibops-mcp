@@ -118,6 +118,17 @@ mcp.tool()(actions.xo_stop_vm)
 mcp.tool()(actions.xo_migrate_vm)
 mcp.tool()(actions.xo_snapshot_vm)
 
+# VMware vSphere
+mcp.tool()(actions.vsphere_list_vms)
+mcp.tool()(actions.vsphere_get_vm)
+mcp.tool()(actions.vsphere_start_vm)
+mcp.tool()(actions.vsphere_stop_vm)
+mcp.tool()(actions.vsphere_restart_vm)
+mcp.tool()(actions.vsphere_migrate_vm)
+mcp.tool()(actions.vsphere_create_snapshot)
+mcp.tool()(actions.vsphere_list_hosts)
+mcp.tool()(actions.vsphere_get_vm_metrics)
+
 
 # ── Configuration tools (3) ───────────────────────────────────────────────────
 
