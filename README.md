@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![MCP Tools](https://img.shields.io/badge/MCP_tools-74-58a6ff.svg)](https://github.com/VibOpsai/vibops-mcp)
+[![MCP Tools](https://img.shields.io/badge/MCP_tools-83-58a6ff.svg)](https://github.com/VibOpsai/vibops-mcp)
 [![Tests](https://img.shields.io/badge/tests-4%2C751_passing-brightgreen.svg)]()
 
 The provider-agnostic MCP server for GPU infrastructure — one interface for any cloud, any cluster, any provider.
@@ -13,7 +13,7 @@ Large enterprises and CSPs managing GPU infrastructure deal with fragmentation �
 
 ## The solution
 
-`vibops-mcp` is a single MCP server that abstracts this complexity. One `pip install`, 70 tools, and your AI assistant can observe, operate, govern, and optimize your entire GPU fleet — regardless of where it runs.
+`vibops-mcp` is a single MCP server that abstracts this complexity. One `pip install`, 83 tools, and your AI assistant can observe, operate, govern, and optimize your entire GPU fleet — regardless of where it runs.
 
 - **Observe** — GPU utilisation, workload breakdown, MTTR, cost estimates, live K8s deployments
 - **Act** — deploy models, scale deployments, run Helm/kubectl, trigger pipelines, submit Slurm jobs
@@ -183,6 +183,20 @@ The missing layer between your AI agents and your GPU fleet. Works with any fram
 | `get_siem_config` | Get SIEM push export configuration |
 | `update_siem_config` | Set Splunk/Datadog SIEM destination |
 | `push_to_siem` | Export audit events to configured SIEM |
+
+### VM / Hypervisor (9 tools — VMware vSphere)
+
+| Tool | Description |
+|------|-------------|
+| `vsphere_list_vms` | List all VMs in the vCenter inventory (filter by power state, datacenter, cluster) |
+| `vsphere_get_vm` | Get detailed info on a VM — CPU, RAM, IP, NICs, snapshots, VMware Tools status |
+| `vsphere_start_vm` | Power on a VM |
+| `vsphere_stop_vm` | Shut down a VM — guest shutdown via VMware Tools, hard power-off as fallback |
+| `vsphere_restart_vm` | Reboot a VM — guest reboot via VMware Tools, hard reset as fallback |
+| `vsphere_migrate_vm` | Live-migrate (vMotion) a VM to another ESXi host (`dry_run=True` to validate first) |
+| `vsphere_create_snapshot` | Create a VM snapshot — auto-quiesces when VMware Tools is running |
+| `vsphere_list_hosts` | List all ESXi hosts with CPU, memory, and connection state |
+| `vsphere_get_vm_metrics` | Real-time CPU, memory, disk and network metrics for a VM |
 
 ### GPU FinOps (4 tools)
 
