@@ -15,7 +15,7 @@ def _make_response(status_code: int, json_data=None, content=b"{}"):
     r.content = content if content else b""
     r.json.return_value = json_data or {}
     if status_code >= 400:
-        from httpx import HTTPStatusError, Request, Response
+        from httpx import HTTPStatusError
         r.raise_for_status.side_effect = HTTPStatusError(
             message=f"HTTP {status_code}", request=MagicMock(), response=MagicMock()
         )

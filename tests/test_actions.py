@@ -270,7 +270,7 @@ async def test_trigger_pipeline_calls_correct_endpoint():
         mock_post.return_value = {"status": "accepted"}
         await actions.trigger_pipeline("uuid-1234")
 
-    path = mock_post.call_args[0][0] if mock_post.call_args[0] else mock_post.call_args[1].get("path", "")
+    mock_post.call_args[0][0] if mock_post.call_args[0] else mock_post.call_args[1].get("path", "")
     # Check the path contains the pipeline id
     call_args = mock_post.call_args
     assert "uuid-1234" in str(call_args)
