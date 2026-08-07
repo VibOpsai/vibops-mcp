@@ -784,3 +784,113 @@ async def vsphere_list_hosts(
 async def vsphere_get_vm_metrics(name: str, gateway_id: str | None = None) -> dict:
     """Get real-time CPU, memory, disk, and network metrics for a vSphere VM."""
     return await _run_job_sync("vsphere_get_vm_metrics", {"name": name}, gateway_id=gateway_id)
+
+
+# ── Proxmox — extended VM actions ────────────────────────────────────────────
+
+async def proxmox_delete_vm(vmid: int, node: str, confirmed: bool = False, gateway_id: str | None = None) -> dict:
+    """Permanently delete a Proxmox VM. Set confirmed=True after user approval."""
+    return await _run_job_sync("proxmox_delete_vm", {"vmid": vmid, "node": node, "confirmed": confirmed}, gateway_id=gateway_id)
+
+
+async def proxmox_resize_vm(vmid: int, node: str, cores: int | None = None, memory: int | None = None, disk_size: str | None = None, confirmed: bool = False, gateway_id: str | None = None) -> dict:
+    """Resize a Proxmox VM (CPU cores, memory MB, or disk). VM may need reboot."""
+    payload: dict = {"vmid": vmid, "node": node, "confirmed": confirmed}
+    if cores is not None: payload["cores"] = cores
+    if memory is not None: payload["memory"] = memory
+    if disk_size is not None: payload["disk_size"] = disk_size
+    return await _run_job_sync("proxmox_resize_vm", payload, gateway_id=gateway_id)
+
+
+async def proxmox_clone_vm(vmid: int, node: str, new_name: str, target_node: str | None = None, full_clone: bool = False, confirmed: bool = False, gateway_id: str | None = None) -> dict:
+    """Clone a Proxmox VM."""
+    payload: dict = {"vmid": vmid, "node": node, "new_name": new_name, "full_clone": full_clone, "confirmed": confirmed}
+    if target_node: payload["target_node"] = target_node
+    return await _run_job_sync("proxmox_clone_vm", payload, gateway_id=gateway_id)
+
+
+async def proxmox_list_snapshots(vmid: int, node: str, gateway_id: str | None = None) -> dict:
+    """List all snapshots for a Proxmox VM."""
+    return await _run_job_sync("proxmox_list_snapshots", {"vmid": vmid, "node": node}, gateway_id=gateway_id)
+
+
+async def proxmox_restore_snapshot(vmid: int, node: str, snapname: str, confirmed: bool = False, gateway_id: str | None = None) -> dict:
+    """Restore a Proxmox VM to a previous snapshot. Current state will be lost."""
+    return await _run_job_sync("proxmox_restore_snapshot", {"vmid": vmid, "node": node, "snapname": snapname, "confirmed": confirmed}, gateway_id=gateway_id)
+
+
+async def proxmox_delete_snapshot(vmid: int, node: str, snapname: str, confirmed: bool = False, gateway_id: str | None = None) -> dict:
+    """Delete a snapshot from a Proxmox VM."""
+    return await _run_job_sync("proxmox_delete_snapshot", {"vmid": vmid, "node": node, "snapname": snapname, "confirmed": confirmed}, gateway_id=gateway_id)
+
+
+# ── XO — extended VM actions ────────────────────────────────────────────────
+
+async def xo_delete_vm(vm_id: str, confirmed: bool = False, gateway_id: str | None = None) -> dict:
+    """Permanently delete an XCP-ng VM via Xen Orchestra."""
+    return await _run_job_sync("xo_delete_vm", {"vm_id": vm_id, "confirmed": confirmed}, gateway_id=gateway_id)
+
+
+async def xo_resize_vm(vm_id: str, cpus: int | None = None, memory: int | None = None, confirmed: bool = False, gateway_id: str | None = None) -> dict:
+    """Resize an XCP-ng VM (vCPUs or memory bytes)."""
+    payload: dict = {"vm_id": vm_id, "confirmed": confirmed}
+    if cpus is not None: payload["cpus"] = cpus
+    if memory is not None: payload["memory"] = memory
+    return await _run_job_sync("xo_resize_vm", payload, gateway_id=gateway_id)
+
+
+async def xo_clone_vm(vm_id: str, new_name: str, full_clone: bool = False, confirmed: bool = False, gateway_id: str | None = None) -> dict:
+    """Clone an XCP-ng VM."""
+    return await _run_job_sync("xo_clone_vm", {"vm_id": vm_id, "new_name": new_name, "full_clone": full_clone, "confirmed": confirmed}, gateway_id=gateway_id)
+
+
+async def xo_list_snapshots(vm_id: str, gateway_id: str | None = None) -> dict:
+    """List all snapshots for an XCP-ng VM."""
+    return await _run_job_sync("xo_list_snapshots", {"vm_id": vm_id}, gateway_id=gateway_id)
+
+
+async def xo_restore_snapshot(vm_id: str, snapshot_id: str, confirmed: bool = False, gateway_id: str | None = None) -> dict:
+    """Restore an XCP-ng VM to a previous snapshot."""
+    return await _run_job_sync("xo_restore_snapshot", {"vm_id": vm_id, "snapshot_id": snapshot_id, "confirmed": confirmed}, gateway_id=gateway_id)
+
+
+async def xo_delete_snapshot(vm_id: str, snapshot_id: str, confirmed: bool = False, gateway_id: str | None = None) -> dict:
+    """Delete a snapshot from an XCP-ng VM."""
+    return await _run_job_sync("xo_delete_snapshot", {"vm_id": vm_id, "snapshot_id": snapshot_id, "confirmed": confirmed}, gateway_id=gateway_id)
+
+
+# ── vSphere — extended VM actions ────────────────────────────────────────────
+
+async def vsphere_delete_vm(name: str, confirmed: bool = False, gateway_id: str | None = None) -> dict:
+    """Permanently delete a vSphere VM."""
+    return await _run_job_sync("vsphere_delete_vm", {"name": name, "confirmed": confirmed}, gateway_id=gateway_id)
+
+
+async def vsphere_resize_vm(name: str, num_cpus: int | None = None, memory_mb: int | None = None, confirmed: bool = False, gateway_id: str | None = None) -> dict:
+    """Resize a vSphere VM (vCPUs or memory). VM must be powered off."""
+    payload: dict = {"name": name, "confirmed": confirmed}
+    if num_cpus is not None: payload["num_cpus"] = num_cpus
+    if memory_mb is not None: payload["memory_mb"] = memory_mb
+    return await _run_job_sync("vsphere_resize_vm", payload, gateway_id=gateway_id)
+
+
+async def vsphere_clone_vm(name: str, clone_name: str, datacenter: str | None = None, confirmed: bool = False, gateway_id: str | None = None) -> dict:
+    """Clone a vSphere VM."""
+    payload: dict = {"name": name, "clone_name": clone_name, "confirmed": confirmed}
+    if datacenter: payload["datacenter"] = datacenter
+    return await _run_job_sync("vsphere_clone_vm", payload, gateway_id=gateway_id)
+
+
+async def vsphere_list_snapshots(name: str, gateway_id: str | None = None) -> dict:
+    """List all snapshots for a vSphere VM."""
+    return await _run_job_sync("vsphere_list_snapshots", {"name": name}, gateway_id=gateway_id)
+
+
+async def vsphere_restore_snapshot(name: str, snapshot_name: str, confirmed: bool = False, gateway_id: str | None = None) -> dict:
+    """Restore a vSphere VM to a previous snapshot."""
+    return await _run_job_sync("vsphere_restore_snapshot", {"name": name, "snapshot_name": snapshot_name, "confirmed": confirmed}, gateway_id=gateway_id)
+
+
+async def vsphere_delete_snapshot(name: str, snapshot_name: str, confirmed: bool = False, gateway_id: str | None = None) -> dict:
+    """Delete a snapshot from a vSphere VM."""
+    return await _run_job_sync("vsphere_delete_snapshot", {"name": name, "snapshot_name": snapshot_name, "confirmed": confirmed}, gateway_id=gateway_id)

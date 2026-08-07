@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![MCP Tools](https://img.shields.io/badge/MCP_tools-74-58a6ff.svg)](https://github.com/VibOpsai/vibops-mcp)
+[![MCP Tools](https://img.shields.io/badge/MCP_tools-96-58a6ff.svg)](https://github.com/VibOpsai/vibops-mcp)
 [![Tests](https://img.shields.io/badge/tests-4%2C751_passing-brightgreen.svg)]()
 
 The provider-agnostic MCP server for GPU infrastructure — one interface for any cloud, any cluster, any provider.
@@ -13,10 +13,10 @@ Large enterprises and CSPs managing GPU infrastructure deal with fragmentation �
 
 ## The solution
 
-`vibops-mcp` is a single MCP server that abstracts this complexity. One `pip install`, 70 tools, and your AI assistant can observe, operate, govern, and optimize your entire GPU fleet — regardless of where it runs.
+`vibops-mcp` is a single MCP server that abstracts this complexity. One `pip install`, 96 tools, and your AI assistant can observe, operate, govern, and optimize your entire GPU fleet — regardless of where it runs.
 
 - **Observe** — GPU utilisation, workload breakdown, MTTR, cost estimates, live K8s deployments
-- **Act** — deploy models, scale deployments, run Helm/kubectl, trigger pipelines, submit Slurm jobs
+- **Act** — deploy models, scale deployments, run Helm/kubectl, trigger pipelines, submit Slurm jobs, manage VMs (Proxmox/XO/vSphere)
 - **Govern** — anomaly detection, AI Act compliance, SOC 2/RGPD reports, immutable audit chain, policy management
 - **FinOps** — budget tracking, chargeback, spend trends, waste analysis
 
