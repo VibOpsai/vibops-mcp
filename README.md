@@ -5,22 +5,23 @@
 [![MCP Tools](https://img.shields.io/badge/MCP_tools-130-58a6ff.svg)](https://github.com/VibOpsai/vibops-mcp)
 [![Tests](https://img.shields.io/badge/tests-4%2C751_passing-brightgreen.svg)]()
 
-The provider-agnostic MCP server for GPU infrastructure — one interface for any cloud, any cluster, any provider.
+The MCP server for **VibOps — The AI Infrastructure Engine**. From code to GPU in one conversation.
 
 ## The problem
 
-Large enterprises and CSPs managing GPU infrastructure deal with fragmentation — AWS, GCP, Azure, on-prem, neoclouds, each with their own API, dashboard, and cost model. Correlating utilisation, cost, workload type, and compliance posture across providers requires jumping between 5 tools.
+Getting an AI app from code to production on GPUs requires stitching together 9+ tools — git, Docker, CI/CD, Helm, kubectl, GPU monitoring, cost management, compliance, alerting. Each with its own API, dashboard, and cost model. No single interface spans the full pipeline.
 
 ## The solution
 
-`vibops-mcp` is a single MCP server that abstracts this complexity. One `pip install`, 130 tools, and your AI assistant can observe, operate, govern, and optimize your entire GPU fleet — regardless of where it runs.
+`vibops-mcp` connects your AI assistant to VibOps — the engine that clones, builds, deploys, scales, monitors, fixes, and bills your apps and agents on any GPU, any cluster, any cloud. One `pip install`, 130 tools, one conversation.
 
+- **Ship** — clone repos, build containers, deploy models, run Helm/kubectl, trigger pipelines, submit Slurm jobs
+- **Operate** — scale deployments, manage VMs (Proxmox/XO/vSphere), detect and remediate GPU anomalies
 - **Observe** — GPU utilisation, workload breakdown, MTTR, cost estimates, live K8s deployments
-- **Act** — deploy models, scale deployments, run Helm/kubectl, trigger pipelines, submit Slurm jobs, manage VMs (Proxmox/XO/vSphere)
-- **Govern** — anomaly detection, AI Act compliance, SOC 2/RGPD reports, immutable audit chain, policy management
-- **FinOps** — budget tracking, chargeback, spend trends, waste analysis
+- **Govern** — AI Act compliance, SOC 2/RGPD reports, immutable audit chain, policy management
+- **FinOps** — per-agent cost tracking, budget enforcement, chargeback, spend trends, waste analysis
 
-All operations go through your VibOps instance and are recorded in the audit log.
+Every operation goes through your VibOps instance and is recorded in the immutable audit log.
 
 ## Installation
 
@@ -221,22 +222,22 @@ The proxy captures: agent ID, team, model, tokens, latency, GPU cost — visible
 ## Example prompts
 
 ```
+"Clone my repo and deploy it on the GPU cluster."
+"Deploy llama3:8b on vibops-dev with 2 replicas."
+"Scale the inference deployment to 4 replicas on prod-cluster."
 "What's our GPU utilisation trend over the last 7 days?"
 "Show me the cost breakdown per cluster this week."
-"Deploy llama3:8b on vibops-dev with 2 replicas."
 "Which clusters have open critical GPU alerts?"
-"Scale the inference deployment to 4 replicas on prod-cluster."
-"What's our MTTR for critical alerts?"
 "Are there any open GPU anomalies right now?"
+"Scan my infrastructure and show discovered services."
 "What's our AI Act compliance score and which controls are non-compliant?"
 "Generate a SOC 2 report for Q1 2026."
 "Verify the audit chain hasn't been tampered with."
-"Show me the spend trend for the last 7 days and flag any waste."
-"Create a machine identity for the pricing-agent with a 1-year expiry."
-"Which agents depend on the claude-opus-4-6 model?"
 "Which agent costs the most in GPU this month?"
 "Show me the inference cost breakdown for the pricing agent."
-"What's the GPU spend per team for the last 7 days?"
+"Which agents depend on the claude-opus-4-6 model?"
+"Create a machine identity for the pricing-agent with a 1-year expiry."
+"Show me the spend trend for the last 7 days and flag any waste."
 ```
 
 ## Contributing
@@ -247,4 +248,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). All contributions require a DCO sign-off
 
 MIT — free to use, modify, and distribute. See [LICENSE](LICENSE).
 
-Built on [FastMCP](https://github.com/jlowin/fastmcp) and the [VibOps](https://vibops.ai) platform.
+Built on [FastMCP](https://github.com/jlowin/fastmcp) and [VibOps](https://vibops.ai) — The AI Infrastructure Engine.
