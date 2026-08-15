@@ -82,11 +82,41 @@ EXPECTED_TOOLS = {
     "get_siem_config",
     "update_siem_config",
     "push_to_siem",
-    # FinOps (4)
+    # FinOps (5)
     "get_budget",
     "get_chargeback",
     "get_spend_trend",
     "get_waste_analysis",
+    "get_vm_usage",
+    # Agent FinOps (5)
+    "get_agent_usage",
+    "get_agent_usage_detail",
+    "get_agent_budget",
+    "set_agent_budget",
+    "get_agent_model_rules",
+    "update_agent_model_rule",
+    # VM — Proxmox (5)
+    "proxmox_list_vms",
+    "proxmox_start_vm",
+    "proxmox_stop_vm",
+    "proxmox_create_snapshot",
+    "proxmox_migrate_vm",
+    # VM — Xen Orchestra (5)
+    "xo_list_vms",
+    "xo_start_vm",
+    "xo_stop_vm",
+    "xo_migrate_vm",
+    "xo_snapshot_vm",
+    # VM — vSphere (8)
+    "vsphere_list_vms",
+    "vsphere_start_vm",
+    "vsphere_stop_vm",
+    "vsphere_restart_vm",
+    "vsphere_migrate_vm",
+    "vsphere_create_snapshot",
+    "vsphere_get_vm",
+    "vsphere_get_vm_metrics",
+    "vsphere_list_hosts",
 }
 
 
@@ -104,14 +134,14 @@ def _registered_tool_names() -> set[str]:
 
 
 def test_all_tools_registered():
-    """All 68 expected tools must be registered on the MCP server."""
+    """All expected tools must be registered on the MCP server."""
     registered = _registered_tool_names()
     missing = EXPECTED_TOOLS - registered
     assert not missing, f"Tools not registered: {missing}"
 
 
 def test_no_unexpected_tools():
-    """No extra tools should be registered beyond the expected 68."""
+    """No extra tools should be registered beyond the expected set."""
     registered = _registered_tool_names()
     unexpected = registered - EXPECTED_TOOLS
     assert not unexpected, f"Unexpected tools registered: {unexpected}"
