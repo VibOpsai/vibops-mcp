@@ -2,8 +2,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![MCP Tools](https://img.shields.io/badge/MCP_tools-130-58a6ff.svg)](https://github.com/VibOpsai/vibops-mcp)
-[![Tests](https://img.shields.io/badge/tests-5%2C700_passing-brightgreen.svg)]()
+[![MCP Tools](https://img.shields.io/badge/MCP_tools-94-58a6ff.svg)](https://github.com/VibOpsai/vibops-mcp)
+[![Tests](https://img.shields.io/badge/tests-4%2C900_passing-brightgreen.svg)]()
 
 The MCP server for **VibOps — The AI Infrastructure Engine**. From code to GPU in one conversation.
 
@@ -13,7 +13,7 @@ Getting an AI app from code to production on GPUs requires stitching together 9+
 
 ## The solution
 
-`vibops-mcp` connects your AI assistant to VibOps — the engine that clones, builds, deploys, scales, monitors, fixes, and bills your apps and agents on any GPU, any cluster, any cloud. One `pip install`, 130 tools, one conversation.
+`vibops-mcp` connects your AI assistant to VibOps — the engine that clones, builds, deploys, scales, monitors, fixes, and bills your apps and agents on any GPU, any cluster, any cloud. One `pip install`, 94 tools, one conversation.
 
 - **Ship** — clone repos, build containers, deploy models, run Helm/kubectl, trigger pipelines, submit Slurm jobs
 - **Operate** — scale deployments, manage VMs (Proxmox/XO/vSphere), detect and remediate GPU anomalies
