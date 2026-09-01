@@ -160,7 +160,7 @@ async def list_alerts(severity: str | None = None, resolved: bool | None = None)
         params["severity"] = severity
     if resolved is not None:
         params["resolved"] = str(resolved).lower()
-    return await client.get("/api/v1/alerts", params=params)
+    return await client.get("/api/v1/alert-history", params=params)
 
 
 async def list_secrets(search: str | None = None) -> dict:

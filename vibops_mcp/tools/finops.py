@@ -16,7 +16,7 @@ async def get_budget() -> dict:
     (queue / throttle / reject). Use set_cluster_rate to configure per-GPU
     hourly rates before relying on cost figures.
     """
-    return await client.get("/api/v1/budget")
+    return await client.get("/api/v1/finops/budget")
 
 
 async def get_chargeback(year: int, month: int) -> dict:
@@ -31,7 +31,7 @@ async def get_chargeback(year: int, month: int) -> dict:
         year: Four-digit year (e.g. 2026).
         month: Month number 1–12 (e.g. 5 for May).
     """
-    return await client.get(f"/api/v1/chargeback/{year}/{month}")
+    return await client.get(f"/api/v1/finops/chargeback/{year}/{month}")
 
 
 async def get_spend_trend(days: int = 30) -> dict:
@@ -45,7 +45,7 @@ async def get_spend_trend(days: int = 30) -> dict:
     Args:
         days: Lookback window in days (default 30, max 90).
     """
-    return await client.get("/api/v1/spend/trend", params={"days": days})
+    return await client.get("/api/v1/finops/spend/trend", params={"days": days})
 
 
 async def get_agent_usage(
@@ -144,4 +144,4 @@ async def get_waste_analysis() -> dict:
     queue depth. Each finding includes an estimated wasted cost and a
     recommended remediation action (scale down, suspend, or reassign).
     """
-    return await client.get("/api/v1/waste")
+    return await client.get("/api/v1/finops/waste")
