@@ -556,7 +556,7 @@ async def push_to_siem(
         params["until"] = until
     if action:
         params["action"] = action
-    return await client.post("/api/v1/audit/siem/push", params=params)
+    return await client.post("/api/v1/audit/siem/push", body=params)
 
 
 async def get_agent_model_rules() -> dict:
@@ -593,4 +593,4 @@ async def update_agent_model_rule(
         body["allowed_models"] = allowed_models
     if denied_models is not None:
         body["denied_models"] = denied_models
-    return await client.post("/api/v1/policy/agent-model-rules", json=body)
+    return await client.post("/api/v1/policy/agent-model-rules", body=body)

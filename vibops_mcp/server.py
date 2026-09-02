@@ -60,7 +60,7 @@ mcp = FastMCP(
 )
 
 
-# ── Observation tools (16) ────────────────────────────────────────────────────
+# ── Observation tools (17) ────────────────────────────────────────────────────
 
 mcp.tool()(observation.list_clusters)
 mcp.tool()(observation.get_cluster_deployments)
@@ -81,7 +81,7 @@ mcp.tool()(observation.get_cluster_rate)
 mcp.tool()(observation.list_kubectl_contexts)
 
 
-# ── Action tools (18) ─────────────────────────────────────────────────────────
+# ── Action tools (37) ─────────────────────────────────────────────────────────
 
 mcp.tool()(actions.scale_deployment)
 mcp.tool()(actions.deploy_model)
@@ -192,7 +192,7 @@ mcp.tool()(governance.get_agent_model_rules)
 mcp.tool()(governance.update_agent_model_rule)
 
 
-# ── FinOps tools (10) ─────────────────────────────────────────────────────────
+# ── FinOps tools (8) ─────────────────────────────────────────────────────────
 
 mcp.tool()(finops.get_budget)
 mcp.tool()(finops.get_chargeback)

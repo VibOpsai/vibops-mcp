@@ -126,7 +126,7 @@ async def set_agent_budget(
         hard_cap_pct: Percentage at which requests are blocked (default 100).
         action: Enforcement action at hard cap — "reject" (default) or "warn".
     """
-    return await client.post("/api/v1/finops/agent-budgets", json={
+    return await client.post("/api/v1/finops/agent-budgets", body={
         "agent_id": agent_id,
         "monthly_limit_usd": monthly_limit_usd,
         "soft_cap_pct": soft_cap_pct,

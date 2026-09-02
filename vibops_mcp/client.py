@@ -53,7 +53,17 @@ async def _request(method: str, path: str, **kwargs) -> dict:
         async with _client() as c:
             r = await c.request(method, path, **kwargs)
         if r.status_code not in _RETRY_STATUSES or attempt == _MAX_RETRIES - 1:
-            r.raise_for_status()
+            if r.status_code >= 400:
+                # Structured error — strip internal details from the response
+                try:
+                    detail = r.json().get("detail", f"HTTP {r.status_code}")
+                except Exception:
+                    detail = f"HTTP {r.status_code}"
+                raise httpx.HTTPStatusError(
+                    message=str(detail),
+                    request=r.request,
+                    response=r,
+                )
             if r.status_code == 204 or not r.content:
                 return {"deleted": True}
             return r.json()

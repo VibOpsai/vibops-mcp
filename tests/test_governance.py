@@ -398,7 +398,7 @@ async def test_push_to_siem_no_filters():
     with patch("vibops_mcp.tools.governance.client.post", new_callable=AsyncMock) as mock:
         mock.return_value = {"pushed": 42, "provider": "splunk"}
         await governance.push_to_siem()
-    mock.assert_called_once_with("/api/v1/audit/siem/push", params={"limit": 10000})
+    mock.assert_called_once_with("/api/v1/audit/siem/push", body={"limit": 10000})
 
 
 @pytest.mark.asyncio
@@ -411,7 +411,7 @@ async def test_push_to_siem_with_filters():
             action="deploy_model",
             limit=500,
         )
-    mock.assert_called_once_with("/api/v1/audit/siem/push", params={
+    mock.assert_called_once_with("/api/v1/audit/siem/push", body={
         "since": "2026-06-01T00:00:00Z",
         "until": "2026-06-15T23:59:59Z",
         "action": "deploy_model",

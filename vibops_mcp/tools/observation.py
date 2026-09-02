@@ -1,5 +1,5 @@
 """
-Observation tools (read-only) — 15 tools.
+Observation tools (read-only) — 17 tools.
 
 These tools let the LLM inspect the state of the infrastructure
 without triggering any side effects.
