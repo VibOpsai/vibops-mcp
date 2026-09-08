@@ -42,7 +42,7 @@ mcp = FastMCP(
         "- Use run_kubectl only for operations not covered by dedicated tools (get, describe, logs).\n"
         "- Before triggering a pipeline, use list_pipelines to find its UUID.\n"
         "- GPU anomalies (idle, spike, node loss): get_open_anomalies, then resolve_anomaly once fixed.\n"
-        "- AI Act compliance: list_ai_act_controls + get_ai_act_score. Update controls with update_ai_act_control.\n"
+        "- Compliance controls (AI Act, GDPR, PDPL, HIPAA…): list_compliance_controls(framework=) + get_compliance_score(framework=). Update with update_compliance_control.\n"
         "- Compliance reports (SOC 2, RGPD, HIPAA): generate_compliance_report, then poll get_compliance_report.\n"
         "- Audit integrity: list_audit_logs to query events, verify_audit_chain to confirm no tampering.\n"
         "- Policy changes: get_policy first, modify, then update_policy. Changes are immediate.\n"
@@ -144,10 +144,10 @@ mcp.tool()(governance.list_anomalies)
 mcp.tool()(governance.get_open_anomalies)
 mcp.tool()(governance.resolve_anomaly)
 
-# AI Act compliance
-mcp.tool()(governance.list_ai_act_controls)
-mcp.tool()(governance.get_ai_act_score)
-mcp.tool()(governance.update_ai_act_control)
+# Compliance controls (multi-framework)
+mcp.tool()(governance.list_compliance_controls)
+mcp.tool()(governance.get_compliance_score)
+mcp.tool()(governance.update_compliance_control)
 
 # Compliance reports
 mcp.tool()(governance.list_compliance_reports)

@@ -166,9 +166,9 @@ The missing layer between your AI agents and your GPU fleet. Works with any fram
 | `list_anomalies` | List GPU anomalies with optional cluster/status filter |
 | `get_open_anomalies` | Get all currently open anomalies |
 | `resolve_anomaly` | Mark an anomaly as resolved |
-| `list_ai_act_controls` | List AI Act compliance controls |
-| `get_ai_act_score` | Get the overall AI Act compliance score |
-| `update_ai_act_control` | Update status, notes, or evidence URL for a control |
+| `list_compliance_controls` | List compliance controls (filter by framework) |
+| `get_compliance_score` | Get the compliance score for a framework (or all) |
+| `update_compliance_control` | Update status, notes, or evidence URL for a control |
 | `list_compliance_reports` | List generated compliance reports |
 | `generate_compliance_report` | Generate a SOC 2, RGPD, or HIPAA report asynchronously |
 | `get_compliance_report` | Poll/retrieve a generated compliance report |

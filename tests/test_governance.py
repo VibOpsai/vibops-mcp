@@ -59,45 +59,53 @@ async def test_resolve_anomaly_with_reason():
     )
 
 
-# ── AI Act ────────────────────────────────────────────────────────────────────
+# ── Compliance controls (multi-framework) ────────────────────────────────────
 
 @pytest.mark.asyncio
-async def test_list_ai_act_controls():
+async def test_list_compliance_controls():
     with patch("vibops_mcp.tools.governance.client.get", new_callable=AsyncMock) as mock:
-        mock.return_value = {"controls": []}
-        await governance.list_ai_act_controls()
-    mock.assert_called_once_with("/api/v1/compliance/ai-act")
+        mock.return_value = {"items": []}
+        await governance.list_compliance_controls()
+    mock.assert_called_once_with("/api/v1/compliance/controls", params=None)
 
 
 @pytest.mark.asyncio
-async def test_get_ai_act_score():
+async def test_list_compliance_controls_filtered():
+    with patch("vibops_mcp.tools.governance.client.get", new_callable=AsyncMock) as mock:
+        mock.return_value = {"items": []}
+        await governance.list_compliance_controls(framework="gdpr")
+    mock.assert_called_once_with("/api/v1/compliance/controls", params={"framework": "gdpr"})
+
+
+@pytest.mark.asyncio
+async def test_get_compliance_score():
     with patch("vibops_mcp.tools.governance.client.get", new_callable=AsyncMock) as mock:
         mock.return_value = {"score": 83.3}
-        await governance.get_ai_act_score()
-    mock.assert_called_once_with("/api/v1/compliance/ai-act/score")
+        await governance.get_compliance_score(framework="ai_act")
+    mock.assert_called_once_with("/api/v1/compliance/controls/score", params={"framework": "ai_act"})
 
 
 @pytest.mark.asyncio
-async def test_update_ai_act_control_status_only():
+async def test_update_compliance_control_status_only():
     with patch("vibops_mcp.tools.governance.client.patch", new_callable=AsyncMock) as mock:
         mock.return_value = {"status": "compliant"}
-        await governance.update_ai_act_control("ctrl-uuid", "compliant")
+        await governance.update_compliance_control("ctrl-uuid", "compliant")
     mock.assert_called_once_with(
-        "/api/v1/compliance/ai-act/ctrl-uuid",
+        "/api/v1/compliance/controls/ctrl-uuid",
         body={"status": "compliant"},
     )
 
 
 @pytest.mark.asyncio
-async def test_update_ai_act_control_full():
+async def test_update_compliance_control_full():
     with patch("vibops_mcp.tools.governance.client.patch", new_callable=AsyncMock) as mock:
         mock.return_value = {"status": "partial"}
-        await governance.update_ai_act_control(
+        await governance.update_compliance_control(
             "ctrl-uuid", "partial",
             notes="In progress", evidence_url="https://example.com/evidence",
         )
     mock.assert_called_once_with(
-        "/api/v1/compliance/ai-act/ctrl-uuid",
+        "/api/v1/compliance/controls/ctrl-uuid",
         body={
             "status": "partial",
             "notes": "In progress",

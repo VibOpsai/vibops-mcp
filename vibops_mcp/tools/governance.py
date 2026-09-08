@@ -71,49 +71,63 @@ async def resolve_anomaly(anomaly_id: str, reason: str | None = None) -> dict:
     return await client.post(f"/api/v1/anomalies/{anomaly_id}/resolve", body=body)
 
 
-# ── AI Act compliance controls ────────────────────────────────────────────────
+# ── Compliance controls (multi-framework) ────────────────────────────────────
 
-async def list_ai_act_controls() -> dict:
+async def list_compliance_controls(framework: str | None = None) -> dict:
     """
-    List all AI Act compliance controls and their current status.
+    List compliance controls and their current status.
 
-    VibOps pre-seeds 6 articles: Art.9 (risk management), Art.12 (logging &
-    traceability), Art.13 (transparency), Art.14 (human oversight), Art.15
-    (accuracy & robustness), Art.17 (quality management). Each control has a
-    status (compliant / partial / non_compliant / not_applicable), optional
-    notes, and an evidence URL.
+    Supports 19 regulatory frameworks: ai_act, gdpr, uk_gdpr, fadp, bdsg,
+    kvkk, pdpl_saudi, appi, dpa_philippines, privacy_act_au, hipaa, ccpa,
+    lfpdppp, pipl, dpdp, lgpd, pipeda, pdpa_singapore, pipa_korea.
 
-    Use get_ai_act_score to get the aggregated compliance percentage.
+    Each control has a framework, article, title, status (compliant / partial /
+    non_compliant / not_applicable), optional notes, and an evidence URL.
+
+    Use get_compliance_score to get the aggregated compliance percentage.
+
+    Args:
+        framework: Filter by regulatory framework key (optional, returns all if omitted).
     """
-    return await client.get("/api/v1/compliance/ai-act")
+    params: dict = {}
+    if framework:
+        params["framework"] = framework
+    return await client.get("/api/v1/compliance/controls", params=params or None)
 
 
-async def get_ai_act_score() -> dict:
+async def get_compliance_score(framework: str | None = None) -> dict:
     """
-    Return the organisation's overall AI Act compliance score (0–100).
+    Return the organisation's compliance score (0–100) for a framework.
 
     Score is the weighted average of applicable controls: compliant=1.0,
     partial=0.5, non_compliant=0.0. Controls marked not_applicable are
     excluded from the denominator so they do not penalise the score.
 
-    Use list_ai_act_controls to see per-article breakdown and identify gaps.
+    Use list_compliance_controls to see per-article breakdown and identify gaps.
+
+    Args:
+        framework: Regulatory framework key (optional — omit for aggregate across all).
     """
-    return await client.get("/api/v1/compliance/ai-act/score")
+    params: dict = {}
+    if framework:
+        params["framework"] = framework
+    return await client.get("/api/v1/compliance/controls/score", params=params or None)
 
 
-async def update_ai_act_control(
+async def update_compliance_control(
     control_id: str,
     status: str,
     notes: str | None = None,
     evidence_url: str | None = None,
 ) -> dict:
     """
-    Update the status, notes or evidence URL of an AI Act control.
+    Update the status, notes or evidence URL of a compliance control.
 
+    Works across all frameworks (AI Act, GDPR, PDPL, HIPAA, etc.).
     Write operation — recorded in the audit log.
 
     Args:
-        control_id: UUID of the control to update (from list_ai_act_controls).
+        control_id: UUID of the control to update (from list_compliance_controls).
         status: New compliance status — one of: compliant, partial,
                 non_compliant, not_applicable.
         notes: Free-text justification or implementation notes (optional).
@@ -124,7 +138,7 @@ async def update_ai_act_control(
         body["notes"] = notes
     if evidence_url is not None:
         body["evidence_url"] = evidence_url
-    return await client.patch(f"/api/v1/compliance/ai-act/{control_id}", body=body)
+    return await client.patch(f"/api/v1/compliance/controls/{control_id}", body=body)
 
 
 # ── Compliance reports ────────────────────────────────────────────────────────

@@ -57,9 +57,9 @@ EXPECTED_TOOLS = {
     "list_anomalies",
     "get_open_anomalies",
     "resolve_anomaly",
-    "list_ai_act_controls",
-    "get_ai_act_score",
-    "update_ai_act_control",
+    "list_compliance_controls",
+    "get_compliance_score",
+    "update_compliance_control",
     "list_compliance_reports",
     "generate_compliance_report",
     "get_compliance_report",
@@ -165,7 +165,7 @@ def test_server_instructions_contain_routing_guide():
     assert "scale_deployment" in instructions
     assert "run_kubectl" in instructions
     assert "get_open_anomalies" in instructions
-    assert "get_ai_act_score" in instructions
+    assert "get_compliance_score" in instructions
     assert "generate_compliance_report" in instructions
     assert "verify_audit_chain" in instructions
     assert "get_waste_analysis" in instructions
