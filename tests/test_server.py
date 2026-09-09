@@ -101,12 +101,22 @@ EXPECTED_TOOLS = {
     "proxmox_stop_vm",
     "proxmox_create_snapshot",
     "proxmox_migrate_vm",
-    # VM — Xen Orchestra (5)
+    # VM — Xen Orchestra (5 + 10 new)
     "xo_list_vms",
     "xo_start_vm",
     "xo_stop_vm",
     "xo_migrate_vm",
     "xo_snapshot_vm",
+    "xo_v2v_list_esxi",
+    "xo_v2v_list_vmware_vms",
+    "xo_v2v_migrate",
+    "xo_v2v_status",
+    "xo_list_backups",
+    "xo_run_backup",
+    "xo_restore_backup",
+    "xo_list_srs",
+    "xo_list_tasks",
+    "xo_rolling_pool_update",
     # VM — vSphere (8)
     "vsphere_list_vms",
     "vsphere_start_vm",
@@ -117,6 +127,20 @@ EXPECTED_TOOLS = {
     "vsphere_get_vm",
     "vsphere_get_vm_metrics",
     "vsphere_list_hosts",
+    # VM — HPE VME / Morpheus (13)
+    "vme_list_instances",
+    "vme_get_instance",
+    "vme_list_servers",
+    "vme_list_clouds",
+    "vme_start_instance",
+    "vme_stop_instance",
+    "vme_restart_instance",
+    "vme_create_snapshot",
+    "vme_list_snapshots",
+    "vme_convert_image",
+    "vme_list_virtual_images",
+    "vme_detect_vm_waste",
+    "vme_get_activity",
 }
 
 
