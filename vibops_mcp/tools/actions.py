@@ -724,6 +724,161 @@ async def xo_snapshot_vm(vm_id: str, name: str, gateway_id: str | None = None) -
     return await _run_job_sync("xo_snapshot_vm", {"vm_id": vm_id, "name": name}, gateway_id=gateway_id)
 
 
+# ── XO V2V Migration + Backup + Storage ─────────────────────────────────────
+
+async def xo_v2v_list_esxi(gateway_id: str | None = None) -> dict:
+    """
+    List ESXi hosts configured in Xen Orchestra for V2V migration.
+
+    Returns the ESXi servers that XO can connect to for importing VMware VMs
+    into XCP-ng. Add ESXi servers in XO → Settings → Servers.
+
+    Args:
+        gateway_id: Target gateway (optional).
+    """
+    return await _run_job_sync("xo_v2v_list_esxi", {}, gateway_id=gateway_id)
+
+
+async def xo_v2v_list_vmware_vms(esxi_id: str, gateway_id: str | None = None) -> dict:
+    """
+    List VMs on a VMware ESXi host available for V2V migration to XCP-ng.
+
+    Args:
+        esxi_id: ESXi server ID (from xo_v2v_list_esxi).
+        gateway_id: Target gateway (optional).
+    """
+    return await _run_job_sync("xo_v2v_list_vmware_vms", {"esxi_id": esxi_id}, gateway_id=gateway_id)
+
+
+async def xo_v2v_migrate(
+    esxi_id: str,
+    vm_name: str,
+    target_sr: str | None = None,
+    target_network: str | None = None,
+    gateway_id: str | None = None,
+) -> dict:
+    """
+    Migrate a VM from VMware ESXi to XCP-ng using V2V warm migration.
+
+    Warm migration streams disk data while the source VM is still running,
+    then performs a brief cutover (seconds of downtime). Works with all
+    ESXi versions including VMFS6 and VSAN.
+
+    Write operation — recorded in the audit log.
+
+    Args:
+        esxi_id: Source ESXi server ID.
+        vm_name: Name of the VM to migrate on ESXi.
+        target_sr: Target storage repository UUID on XCP-ng (optional).
+        target_network: Target network UUID on XCP-ng (optional).
+        gateway_id: Target gateway (optional).
+    """
+    payload: dict = {"esxi_id": esxi_id, "vm_name": vm_name, "confirmed": True}
+    if target_sr:
+        payload["target_sr"] = target_sr
+    if target_network:
+        payload["target_network"] = target_network
+    return await _run_job_sync("xo_v2v_migrate", payload, gateway_id=gateway_id)
+
+
+async def xo_v2v_status(task_id: str, gateway_id: str | None = None) -> dict:
+    """
+    Check the status of a running V2V migration (progress %, phase, ETA).
+
+    Args:
+        task_id: Migration task ID (returned by xo_v2v_migrate).
+        gateway_id: Target gateway (optional).
+    """
+    return await _run_job_sync("xo_v2v_status", {"task_id": task_id}, gateway_id=gateway_id)
+
+
+async def xo_list_backups(gateway_id: str | None = None) -> dict:
+    """
+    List backup jobs configured in Xen Orchestra.
+
+    Shows job name, mode (full, delta, disaster recovery), and enabled status.
+
+    Args:
+        gateway_id: Target gateway (optional).
+    """
+    return await _run_job_sync("xo_list_backups", {}, gateway_id=gateway_id)
+
+
+async def xo_run_backup(job_id: str, gateway_id: str | None = None) -> dict:
+    """
+    Trigger a backup job immediately.
+
+    Write operation — recorded in the audit log.
+
+    Args:
+        job_id: Backup job ID (from xo_list_backups).
+        gateway_id: Target gateway (optional).
+    """
+    return await _run_job_sync("xo_run_backup", {"job_id": job_id, "confirmed": True}, gateway_id=gateway_id)
+
+
+async def xo_restore_backup(
+    backup_id: str,
+    target_sr: str | None = None,
+    gateway_id: str | None = None,
+) -> dict:
+    """
+    Restore a VM from an XO backup.
+
+    Write operation — recorded in the audit log.
+
+    Args:
+        backup_id: Backup ID to restore.
+        target_sr: Target storage repository UUID (optional).
+        gateway_id: Target gateway (optional).
+    """
+    payload: dict = {"backup_id": backup_id, "confirmed": True}
+    if target_sr:
+        payload["target_sr"] = target_sr
+    return await _run_job_sync("xo_restore_backup", payload, gateway_id=gateway_id)
+
+
+async def xo_list_srs(gateway_id: str | None = None) -> dict:
+    """
+    List storage repositories (SRs) across all XCP-ng pools.
+
+    Returns capacity, usage, free space and usage percentage for each SR.
+
+    Args:
+        gateway_id: Target gateway (optional).
+    """
+    return await _run_job_sync("xo_list_srs", {}, gateway_id=gateway_id)
+
+
+async def xo_list_tasks(gateway_id: str | None = None) -> dict:
+    """
+    List running and recent tasks in Xen Orchestra.
+
+    Shows migrations, backups, snapshots, and other operations in progress
+    with their status and progress percentage.
+
+    Args:
+        gateway_id: Target gateway (optional).
+    """
+    return await _run_job_sync("xo_list_tasks", {}, gateway_id=gateway_id)
+
+
+async def xo_rolling_pool_update(pool_id: str, gateway_id: str | None = None) -> dict:
+    """
+    Start a rolling pool update — patches all XCP-ng hosts one by one.
+
+    VMs are automatically live-migrated to other hosts before each host
+    is patched and rebooted. Zero downtime for running workloads.
+
+    Write operation — recorded in the audit log.
+
+    Args:
+        pool_id: XCP-ng pool UUID (from xo_list_pools).
+        gateway_id: Target gateway (optional).
+    """
+    return await _run_job_sync("xo_rolling_pool_update", {"pool_id": pool_id, "confirmed": True}, gateway_id=gateway_id)
+
+
 # ── VMware vSphere actions ───────────────────────────────────────────────────
 
 async def vsphere_list_vms(

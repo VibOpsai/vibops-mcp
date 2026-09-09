@@ -119,6 +119,18 @@ mcp.tool()(actions.xo_stop_vm)
 mcp.tool()(actions.xo_migrate_vm)
 mcp.tool()(actions.xo_snapshot_vm)
 
+# XO V2V Migration + Backup + Storage
+mcp.tool()(actions.xo_v2v_list_esxi)
+mcp.tool()(actions.xo_v2v_list_vmware_vms)
+mcp.tool()(actions.xo_v2v_migrate)
+mcp.tool()(actions.xo_v2v_status)
+mcp.tool()(actions.xo_list_backups)
+mcp.tool()(actions.xo_run_backup)
+mcp.tool()(actions.xo_restore_backup)
+mcp.tool()(actions.xo_list_srs)
+mcp.tool()(actions.xo_list_tasks)
+mcp.tool()(actions.xo_rolling_pool_update)
+
 # VMware vSphere
 mcp.tool()(actions.vsphere_list_vms)
 mcp.tool()(actions.vsphere_get_vm)
