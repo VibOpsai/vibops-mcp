@@ -815,3 +815,196 @@ async def vsphere_get_vm_metrics(name: str, gateway_id: str | None = None) -> di
     """Get real-time CPU, memory, disk, and network metrics for a vSphere VM."""
     return await _run_job_sync("vsphere_get_vm_metrics", {"name": name}, gateway_id=gateway_id)
 
+
+# ── HPE VME (Morpheus) ──────────────────────────────────────────────────────
+
+async def vme_list_instances(
+    status: str = "all",
+    cloud: str | None = None,
+    gateway_id: str | None = None,
+) -> dict:
+    """
+    List all VMs managed by HPE VM Essentials (Morpheus).
+
+    Returns name, status, cloud/zone, service plan, CPU and memory for each
+    instance. HPE VME manages both KVM-native VMs and imported VMware VMs
+    from the same console.
+
+    Args:
+        status: Filter by VM status — "running", "stopped", or "all" (default).
+        cloud: Filter by cloud/zone name (optional).
+        gateway_id: Target gateway (optional if only one VME gateway exists).
+    """
+    payload: dict = {}
+    if status != "all":
+        payload["status"] = status
+    if cloud:
+        payload["cloud"] = cloud
+    return await _run_job_sync("vme_list_instances", payload, gateway_id=gateway_id)
+
+
+async def vme_get_instance(instance_id: int, gateway_id: str | None = None) -> dict:
+    """
+    Get detailed status and configuration of a specific HPE VME instance.
+
+    Returns CPU, memory, disk, network, cloud assignment, service plan,
+    creation date and IP address.
+
+    Args:
+        instance_id: Morpheus instance ID (from vme_list_instances).
+        gateway_id: Target gateway (optional).
+    """
+    return await _run_job_sync("vme_get_instance", {"instance_id": instance_id}, gateway_id=gateway_id)
+
+
+async def vme_list_servers(cloud: str | None = None, gateway_id: str | None = None) -> dict:
+    """
+    List all physical hosts managed by HPE VME with CPU, memory and status.
+
+    Args:
+        cloud: Filter by cloud/zone name (optional).
+        gateway_id: Target gateway (optional).
+    """
+    payload: dict = {}
+    if cloud:
+        payload["cloud"] = cloud
+    return await _run_job_sync("vme_list_servers", payload, gateway_id=gateway_id)
+
+
+async def vme_list_clouds(gateway_id: str | None = None) -> dict:
+    """
+    List all clouds/zones configured in HPE VME.
+
+    A cloud in Morpheus represents a hypervisor target: KVM (VME native),
+    VMware vSphere, or any other supported provider. This shows what
+    infrastructure VME is managing.
+
+    Args:
+        gateway_id: Target gateway (optional).
+    """
+    return await _run_job_sync("vme_list_clouds", {}, gateway_id=gateway_id)
+
+
+async def vme_start_instance(instance_id: int, gateway_id: str | None = None) -> dict:
+    """
+    Start a stopped HPE VME instance.
+
+    Write operation — recorded in the audit log.
+
+    Args:
+        instance_id: Morpheus instance ID.
+        gateway_id: Target gateway (optional).
+    """
+    return await _run_job_sync("vme_start_instance", {"instance_id": instance_id}, gateway_id=gateway_id)
+
+
+async def vme_stop_instance(instance_id: int, gateway_id: str | None = None) -> dict:
+    """
+    Stop a running HPE VME instance (graceful shutdown).
+
+    Write operation — recorded in the audit log.
+
+    Args:
+        instance_id: Morpheus instance ID.
+        gateway_id: Target gateway (optional).
+    """
+    return await _run_job_sync("vme_stop_instance", {"instance_id": instance_id}, gateway_id=gateway_id)
+
+
+async def vme_restart_instance(instance_id: int, gateway_id: str | None = None) -> dict:
+    """
+    Restart an HPE VME instance.
+
+    Write operation — recorded in the audit log.
+
+    Args:
+        instance_id: Morpheus instance ID.
+        gateway_id: Target gateway (optional).
+    """
+    return await _run_job_sync("vme_restart_instance", {"instance_id": instance_id}, gateway_id=gateway_id)
+
+
+async def vme_create_snapshot(instance_id: int, name: str, gateway_id: str | None = None) -> dict:
+    """
+    Create a snapshot of an HPE VME instance. Use before migrations or risky changes.
+
+    Write operation — recorded in the audit log.
+
+    Args:
+        instance_id: Morpheus instance ID.
+        name: Snapshot name (e.g. "pre-migration-2026-09-09").
+        gateway_id: Target gateway (optional).
+    """
+    return await _run_job_sync("vme_create_snapshot", {"instance_id": instance_id, "name": name}, gateway_id=gateway_id)
+
+
+async def vme_list_snapshots(instance_id: int, gateway_id: str | None = None) -> dict:
+    """
+    List all snapshots for an HPE VME instance.
+
+    Args:
+        instance_id: Morpheus instance ID.
+        gateway_id: Target gateway (optional).
+    """
+    return await _run_job_sync("vme_list_snapshots", {"instance_id": instance_id}, gateway_id=gateway_id)
+
+
+async def vme_convert_image(image_id: int, format: str, gateway_id: str | None = None) -> dict:
+    """
+    Convert a virtual image to a different disk format.
+
+    Key tool for VMware-to-VME migrations: converts VMDK images to QCOW2
+    (KVM-native format) without manual intervention. The conversion runs
+    asynchronously on the Morpheus appliance.
+
+    Write operation — recorded in the audit log.
+
+    Args:
+        image_id: Virtual image ID (from vme_list_virtual_images).
+        format: Target format — "qcow2", "vmdk", "raw", or "vhd".
+        gateway_id: Target gateway (optional).
+    """
+    return await _run_job_sync("vme_convert_image", {"image_id": image_id, "format": format}, gateway_id=gateway_id)
+
+
+async def vme_list_virtual_images(image_type: str | None = None, gateway_id: str | None = None) -> dict:
+    """
+    List available virtual images in HPE VME (templates, ISOs, uploaded images).
+
+    Use before vme_convert_image to find the image ID of a VMware VMDK
+    that needs conversion for migration.
+
+    Args:
+        image_type: Filter by type (optional).
+        gateway_id: Target gateway (optional).
+    """
+    payload: dict = {}
+    if image_type:
+        payload["image_type"] = image_type
+    return await _run_job_sync("vme_list_virtual_images", payload, gateway_id=gateway_id)
+
+
+async def vme_detect_vm_waste(stopped_days_threshold: int = 7, gateway_id: str | None = None) -> dict:
+    """
+    Detect VM waste in HPE VME: stopped instances and over-provisioned VMs.
+
+    Returns actionable recommendations with severity levels. Use for FinOps
+    reviews and cost optimisation.
+
+    Args:
+        stopped_days_threshold: Flag VMs stopped for more than N days (default: 7).
+        gateway_id: Target gateway (optional).
+    """
+    return await _run_job_sync("vme_detect_vm_waste", {"stopped_days_threshold": stopped_days_threshold}, gateway_id=gateway_id)
+
+
+async def vme_get_activity(max: int = 50, gateway_id: str | None = None) -> dict:
+    """
+    Get recent activity/audit log from HPE VME — provisioning, changes, logins.
+
+    Args:
+        max: Max results (default: 50).
+        gateway_id: Target gateway (optional).
+    """
+    return await _run_job_sync("vme_get_activity", {"max": max}, gateway_id=gateway_id)
+

@@ -16,7 +16,7 @@ Getting an AI app from code to production on GPUs requires stitching together 9+
 `vibops-mcp` connects your AI assistant to VibOps — the engine that clones, builds, deploys, scales, monitors, fixes, and bills your apps and agents on any GPU, any cluster, any cloud. One `pip install`, 93 tools, one conversation.
 
 - **Ship** — clone repos, build containers, deploy models, run Helm/kubectl, trigger pipelines, submit Slurm jobs
-- **Operate** — scale deployments, manage VMs (Proxmox/XO/vSphere), detect and remediate GPU anomalies
+- **Operate** — scale deployments, manage VMs (Proxmox/XO/vSphere/HPE VME), detect and remediate GPU anomalies
 - **Observe** — GPU utilisation, workload breakdown, MTTR, cost estimates, live K8s deployments
 - **Govern** — AI Act compliance, SOC 2/RGPD reports, immutable audit chain, policy management
 - **FinOps** — per-agent cost tracking, budget enforcement, chargeback, spend trends, waste analysis
@@ -127,6 +127,24 @@ claude mcp add vibops vibops-mcp \
 | `registry_list_tags` | List tags for a container image |
 | `registry_check_image` | Check image details (size, layers, created date) |
 | `registry_delete_tag` | Delete a stale image tag (requires confirmed=True) |
+
+### HPE VME / Morpheus (13 tools)
+
+| Tool | Description |
+|------|-------------|
+| `vme_list_instances` | List all VMs managed by HPE VME |
+| `vme_get_instance` | Get detailed VM status and configuration |
+| `vme_list_servers` | List physical hosts with CPU/memory |
+| `vme_list_clouds` | List configured clouds/zones (KVM, VMware) |
+| `vme_start_instance` | Start a stopped instance |
+| `vme_stop_instance` | Stop a running instance |
+| `vme_restart_instance` | Restart an instance |
+| `vme_create_snapshot` | Create a snapshot (pre-migration) |
+| `vme_list_snapshots` | List snapshots for an instance |
+| `vme_convert_image` | Convert disk format (vmdk → qcow2) — VMware migration |
+| `vme_list_virtual_images` | List available images and templates |
+| `vme_detect_vm_waste` | Detect stopped/idle VMs with recommendations |
+| `vme_get_activity` | Recent audit log from Morpheus |
 
 ### Configuration (3 tools)
 

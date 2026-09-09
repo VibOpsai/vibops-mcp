@@ -52,6 +52,7 @@ mcp = FastMCP(
         "- GPU cost & waste: get_budget, get_spend_trend, get_chargeback, get_waste_analysis.\n"
         "- LDAP / Active Directory: get_ldap_config to inspect, update_ldap_config to configure or enable/disable.\n"
         "- SIEM push: get_siem_config to inspect, update_siem_config to set Splunk/Datadog destination, push_to_siem to export audit events.\n"
+        "- HPE VME (Morpheus): vme_list_instances, vme_get_instance, vme_list_servers, vme_list_clouds for inventory. vme_start/stop/restart_instance for lifecycle. vme_create_snapshot, vme_list_snapshots for protection. vme_convert_image for VMware→VME migration (vmdk→qcow2). vme_detect_vm_waste for FinOps.\n"
         "- Container registry: registry_list_repos, registry_list_tags, registry_check_image for inspection; registry_delete_tag (confirmed=True) to remove stale tags.\n"
         "- Agent inference FinOps: get_agent_usage for per-agent LLM cost attribution, get_agent_usage_detail for drill-down on a specific agent.\n"
         "- All write operations (deploy, scale, helm, kubectl, policy, identities) are recorded in the VibOps audit log.\n"
@@ -128,6 +129,21 @@ mcp.tool()(actions.vsphere_migrate_vm)
 mcp.tool()(actions.vsphere_create_snapshot)
 mcp.tool()(actions.vsphere_list_hosts)
 mcp.tool()(actions.vsphere_get_vm_metrics)
+
+# HPE VME (Morpheus) — 13 tools
+mcp.tool()(actions.vme_list_instances)
+mcp.tool()(actions.vme_get_instance)
+mcp.tool()(actions.vme_list_servers)
+mcp.tool()(actions.vme_list_clouds)
+mcp.tool()(actions.vme_start_instance)
+mcp.tool()(actions.vme_stop_instance)
+mcp.tool()(actions.vme_restart_instance)
+mcp.tool()(actions.vme_create_snapshot)
+mcp.tool()(actions.vme_list_snapshots)
+mcp.tool()(actions.vme_convert_image)
+mcp.tool()(actions.vme_list_virtual_images)
+mcp.tool()(actions.vme_detect_vm_waste)
+mcp.tool()(actions.vme_get_activity)
 
 
 # ── Configuration tools (3) ───────────────────────────────────────────────────
