@@ -13,7 +13,7 @@ Getting an AI app from code to production on GPUs requires stitching together 9+
 
 ## The solution
 
-`vibops-mcp` connects your AI assistant to VibOps — the engine that clones, builds, deploys, scales, monitors, fixes, and bills your apps and agents on any GPU, any cluster, any cloud. One `pip install`, 93 tools, one conversation.
+`vibops-mcp` connects your AI assistant to VibOps — the engine that clones, builds, deploys, scales, monitors, fixes, and bills your apps and agents on any GPU, any cluster, any cloud. One `pip install`, 117 tools, one conversation.
 
 - **Ship** — clone repos, build containers, deploy models, run Helm/kubectl, trigger pipelines, submit Slurm jobs
 - **Operate** — scale deployments, manage VMs (Proxmox/XO/vSphere/HPE VME), detect and remediate GPU anomalies
