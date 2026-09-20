@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![MCP Tools](https://img.shields.io/badge/MCP_tools-93-58a6ff.svg)](https://github.com/VibOpsai/vibops-mcp)
+[![MCP Tools](https://img.shields.io/badge/MCP_tools-117-58a6ff.svg)](https://github.com/VibOpsai/vibops-mcp)
 [![Tests](https://img.shields.io/badge/tests-4%2C900_passing-brightgreen.svg)]()
 
 The MCP server for **VibOps — The AI Infrastructure Engine**. From code to GPU in one conversation.
