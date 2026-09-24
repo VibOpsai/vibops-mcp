@@ -146,6 +146,62 @@ claude mcp add vibops vibops-mcp \
 | `vme_detect_vm_waste` | Detect stopped/idle VMs with recommendations |
 | `vme_get_activity` | Recent audit log from Morpheus |
 
+### Hypervisors — Proxmox, vSphere, Xen Orchestra (30 tools)
+
+Documented last and listed here in full: these were registered and served but
+absent from this README, so a reader counting the sections found 87 of the 117
+the first line promises. They now add up.
+
+**Proxmox VE (5 tools)**
+
+| Tool | Description |
+|------|-------------|
+| `proxmox_list_vms` | List VMs across the cluster with status and sizing |
+| `proxmox_start_vm` | Start a stopped VM |
+| `proxmox_stop_vm` | Stop a running VM (destructive — requires confirmed=True) |
+| `proxmox_migrate_vm` | Migrate a VM to another node (destructive — requires confirmed=True) |
+| `proxmox_create_snapshot` | Snapshot a VM before a risky change |
+
+**VMware vSphere (9 tools)**
+
+| Tool | Description |
+|------|-------------|
+| `vsphere_list_vms` | List VMs with power state, host and resources |
+| `vsphere_get_vm` | Read one VM: power state, host, vCPU, RAM, NICs |
+| `vsphere_get_vm_metrics` | CPU, memory and disk usage for one VM |
+| `vsphere_list_hosts` | List ESXi hosts with capacity |
+| `vsphere_start_vm` | Power a VM on |
+| `vsphere_stop_vm` | Shut a VM down (destructive — requires confirmed=True) |
+| `vsphere_restart_vm` | Restart a VM (destructive — requires confirmed=True) |
+| `vsphere_migrate_vm` | vMotion a VM to another host (destructive — requires confirmed=True) |
+| `vsphere_create_snapshot` | Snapshot a VM |
+
+**Xen Orchestra / XCP-ng (15 tools)**
+
+| Tool | Description |
+|------|-------------|
+| `xo_list_vms` | List VMs across all pools |
+| `xo_start_vm` | Start a VM |
+| `xo_stop_vm` | Cleanly shut a VM down (destructive — requires confirmed=True) |
+| `xo_migrate_vm` | Migrate a VM to another host (destructive — requires confirmed=True) |
+| `xo_snapshot_vm` | Snapshot a VM |
+| `xo_list_srs` | List storage repositories — capacity planning before a migration |
+| `xo_list_tasks` | Running XO tasks |
+| `xo_list_backups` | List configured backup jobs |
+| `xo_run_backup` | Run a backup job now |
+| `xo_restore_backup` | Restore a VM from a backup (destructive — requires confirmed=True) |
+| `xo_rolling_pool_update` | Patch every host in the pool, one at a time (destructive — requires confirmed=True) |
+| `xo_v2v_list_esxi` | List reachable ESXi hosts, for a VMware migration |
+| `xo_v2v_list_vmware_vms` | List the VMs on an ESXi host |
+| `xo_v2v_migrate` | Migrate a VMware VM onto XCP-ng (destructive — requires confirmed=True) |
+| `xo_v2v_status` | Follow a V2V migration in progress |
+
+**Cross-hypervisor**
+
+| Tool | Description |
+|------|-------------|
+| `get_vm_usage` | VM usage and cost across every declared hypervisor |
+
 ### Configuration (3 tools)
 
 | Tool | Description |
