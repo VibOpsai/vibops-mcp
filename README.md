@@ -111,8 +111,8 @@ claude mcp add vibops vibops-mcp \
 |------|-------------|
 | `scale_deployment` | Scale a K8s deployment replica count |
 | `deploy_model` | Deploy an AI model onto a GPU cluster |
-| `helm_upgrade` | Run helm upgrade --install |
-| `helm_uninstall` | Uninstall a Helm release |
+| `helm_upgrade` | Run helm upgrade --install (destructive — requires confirmed=True) |
+| `helm_uninstall` | Uninstall a Helm release (destructive — requires confirmed=True) |
 | `run_kubectl` | Run an arbitrary kubectl command |
 | `git_clone` | Clone a git repository |
 | `create_secret` | Store an encrypted secret |

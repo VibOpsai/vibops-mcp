@@ -124,10 +124,16 @@ async def helm_upgrade(
     chart: str,
     namespace: str = "default",
     values: dict | None = None,
+    confirmed: bool = False,
     gateway_id: str | None = None,
 ) -> dict:
     """
-    Run helm upgrade --install for a chart on a cluster.
+    Run helm upgrade --install for a chart on a cluster. Destructive — requires
+    confirmed=True.
+
+    On an existing release this replaces the running workloads, so it is gated
+    like any other destructive action: call once to get the dry-run preview, then
+    again with confirmed=True.
 
     Use this for Helm chart deployments. For deploying standard AI models,
     use deploy_model instead.
@@ -140,6 +146,7 @@ async def helm_upgrade(
         chart: Helm chart reference (e.g. bitnami/nginx or ./charts/myapp).
         namespace: Kubernetes namespace (default: 'default').
         values: Helm values to override (dict, optional).
+        confirmed: Must be True to proceed. Pass False (default) for a dry-run preview.
         gateway_id: Gateway UUID from list_clusters. Omit for single-gateway deployments;
                     provide to disambiguate when multiple gateways share a cluster name.
     """
@@ -149,6 +156,7 @@ async def helm_upgrade(
         "chart": chart,
         "namespace": namespace,
         "wait": False,
+        "confirmed": confirmed,
     }
     if values:
         payload["values"] = values
@@ -159,10 +167,11 @@ async def helm_uninstall(
     cluster_name: str,
     release_name: str,
     namespace: str = "default",
+    confirmed: bool = False,
     gateway_id: str | None = None,
 ) -> dict:
     """
-    Uninstall a Helm release from a cluster.
+    Uninstall a Helm release from a cluster. Destructive — requires confirmed=True.
 
     Removes all Kubernetes resources created by the release.
 
@@ -172,13 +181,18 @@ async def helm_uninstall(
         cluster_name: Target cluster.
         release_name: Name of the Helm release to remove.
         namespace: Kubernetes namespace (default: 'default').
+        confirmed: Must be True to proceed. Pass False (default) for a dry-run preview.
         gateway_id: Gateway UUID from list_clusters. Omit for single-gateway deployments;
                     provide to disambiguate when multiple gateways share a cluster name.
     """
+    # `confirmed` etait absent : l'action est destructive depuis toujours, donc le
+    # moteur de politiques repondait 409 et cet outil ne pouvait pas aboutir.
+    # Trouve le 24/09 en corrigeant le drapeau de helm_install.
     return await _run_job_sync("helm_uninstall", {
         "cluster": cluster_name,
         "name": release_name,
         "namespace": namespace,
+        "confirmed": confirmed,
     }, timeout=30, gateway_id=gateway_id)
 
 
