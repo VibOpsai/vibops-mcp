@@ -204,7 +204,7 @@ async def test_get_policy():
 
 @pytest.mark.asyncio
 async def test_update_policy():
-    policy = {"default_deny": True, "allowed_models": ["claude-opus-4-6"]}
+    policy = {"default_deny": True, "allowed_models": ["un-modele-autorise"]}
     with patch("vibops_mcp.tools.governance.client.put", new_callable=AsyncMock) as mock:
         mock.return_value = policy
         await governance.update_policy(policy)

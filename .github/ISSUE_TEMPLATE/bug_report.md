@@ -21,4 +21,4 @@ What should have happened.
 - VibOps version:
 - OS:
 - Python:
-- MCP client (Claude Desktop / Cursor / other):
+- MCP client and version:

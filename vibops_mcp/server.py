@@ -9,7 +9,7 @@ Required environment variables:
   VIBOPS_URL    — base URL of your VibOps instance
   VIBOPS_TOKEN  — API token (VibOps → Settings → API Tokens)
 
-Claude Desktop configuration (~/.config/claude/claude_desktop_config.json):
+MCP client configuration (see README.md for where each client reads it):
   {
     "mcpServers": {
       "vibops": {

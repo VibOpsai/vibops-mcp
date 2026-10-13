@@ -38,27 +38,10 @@ You need two environment variables:
 | `VIBOPS_URL` | Base URL of your VibOps instance, e.g. `https://vibops.example.com` |
 | `VIBOPS_TOKEN` | API token — create one in VibOps → Settings → API Tokens |
 
-## Claude Desktop
+## Configuration
 
-Add to `~/.config/claude/claude_desktop_config.json` (macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`):
-
-```json
-{
-  "mcpServers": {
-    "vibops": {
-      "command": "vibops-mcp",
-      "env": {
-        "VIBOPS_URL": "https://vibops.example.com",
-        "VIBOPS_TOKEN": "your-token-here"
-      }
-    }
-  }
-}
-```
-
-## Cursor
-
-Add to `.cursor/mcp.json` in your project root, or to the global config:
+`vibops-mcp` speaks the Model Context Protocol, so the same server entry works
+in any MCP-compatible client. Add it to your client's MCP configuration:
 
 ```json
 {
@@ -74,13 +57,16 @@ Add to `.cursor/mcp.json` in your project root, or to the global config:
 }
 ```
 
-## Claude Code (CLI)
+Where that file lives depends on the client:
 
-```bash
-claude mcp add vibops vibops-mcp \
-  -e VIBOPS_URL=https://vibops.example.com \
-  -e VIBOPS_TOKEN=your-token-here
-```
+| Client | Configuration file |
+|--------|--------------------|
+| Claude Desktop | `~/.config/claude/claude_desktop_config.json` — on macOS, `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| Cursor | `.cursor/mcp.json` in the project root, or the global config |
+
+Other MCP clients read the same block from their own configuration file; see
+your client's documentation for its location. Some ship a command that writes
+the entry for you instead of editing the file by hand.
 
 ## Available tools
 
@@ -309,7 +295,7 @@ The proxy captures: agent ID, team, model, tokens, latency, GPU cost — visible
 "Verify the audit chain hasn't been tampered with."
 "Which agent costs the most in GPU this month?"
 "Show me the inference cost breakdown for the pricing agent."
-"Which agents depend on the claude-opus-4-6 model?"
+"Which agents share the same model, and what does each one cost?"
 "Create a machine identity for the pricing-agent with a 1-year expiry."
 "Show me the spend trend for the last 7 days and flag any waste."
 ```
