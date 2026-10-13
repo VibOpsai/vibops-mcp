@@ -29,6 +29,12 @@ Every operation goes through your VibOps instance and is recorded in the immutab
 pip install git+https://github.com/VibOpsai/vibops-mcp.git
 ```
 
+Released versions are also on PyPI, if you prefer a pinned one:
+
+```bash
+pip install vibops-mcp
+```
+
 ## Configuration
 
 You need two environment variables:
@@ -38,7 +44,7 @@ You need two environment variables:
 | `VIBOPS_URL` | Base URL of your VibOps instance, e.g. `https://vibops.example.com` |
 | `VIBOPS_TOKEN` | API token — create one in VibOps → Settings → API Tokens |
 
-## Configuration
+## Connecting your client
 
 `vibops-mcp` speaks the Model Context Protocol, so the same server entry works
 in any MCP-compatible client. Add it to your client's MCP configuration:
