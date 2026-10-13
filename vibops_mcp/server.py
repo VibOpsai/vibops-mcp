@@ -82,7 +82,7 @@ mcp.tool()(observation.get_cluster_rate)
 mcp.tool()(observation.list_kubectl_contexts)
 
 
-# ── Action tools (37) ─────────────────────────────────────────────────────────
+# ── Action tools (60) ─────────────────────────────────────────────────────────
 
 mcp.tool()(actions.scale_deployment)
 mcp.tool()(actions.deploy_model)
@@ -165,7 +165,7 @@ mcp.tool()(config.register_gateway)
 mcp.tool()(config.delete_gateway)
 
 
-# ── Governance tools (27) ─────────────────────────────────────────────────────
+# ── Governance tools (29) ─────────────────────────────────────────────────────
 
 # Anomalies
 mcp.tool()(governance.list_anomalies)
