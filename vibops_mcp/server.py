@@ -24,6 +24,7 @@ MCP client configuration (see README.md for where each client reads it):
 """
 from mcp.server.fastmcp import FastMCP
 
+from vibops_mcp import __version__
 from vibops_mcp.tools import observation, actions, config, governance, finops
 
 mcp = FastMCP(
@@ -59,6 +60,26 @@ mcp = FastMCP(
         "- VibOps jobs are infrastructure operations, not Kubernetes Jobs. Use list_jobs to review recent operations."
     ),
 )
+
+# ── La version annoncee aux clients ─────────────────────────────────────────
+#
+# `FastMCP` n'a pas de parametre `version` (mesure sur mcp 1.30.0 : sa signature
+# accepte `name`, `instructions`, `website_url`, `icons` et vingt autres, pas
+# celui-la). Le serveur bas niveau l'accepte, et il vaut `None` par defaut —
+# c'est ce `None` qui fait retomber la bibliotheque sur **sa propre** version.
+#
+# Consequence mesuree le 13/10/2026, en parlant MCP au binaire installe depuis
+# PyPI : `initialize` rendait `serverInfo {name: "vibops", version: "1.30.0"}`.
+# Un client y lisait la version du SDK MCP et apprenait donc **rien** sur ce
+# produit, qui etait en 0.55.3.
+#
+# L'affectation passe par un attribut prive, et c'est assume parce que
+# l'observable est tenu par un test : `tests/test_the_announced_version_is_ours.py`
+# interroge `create_initialization_options()`, c'est-a-dire le chemin que la
+# bibliotheque emprunte reellement pour construire sa reponse. Si elle renomme
+# son interne, ce test tombe au lieu de laisser le serveur annoncer en silence
+# la version de quelqu'un d'autre.
+mcp._mcp_server.version = __version__
 
 
 # ── Observation tools (17) ────────────────────────────────────────────────────
