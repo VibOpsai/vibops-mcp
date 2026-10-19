@@ -1,2 +1,2 @@
 """VibOps MCP server — MIT"""
-__version__ = "0.56.6"
+__version__ = "0.56.7"
