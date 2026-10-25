@@ -196,27 +196,11 @@ async def helm_uninstall(
     }, timeout=30, gateway_id=gateway_id)
 
 
-# Mirrors the connector's bound (`refuse_unless_read_only` in
-# vibops_connectors.kubectl.connector), which is the one that governs: this
-# list only spares a round trip. `label` and `annotate` left it on 25/10/2026 —
-# they write, and the connector refuses them.
-_KUBECTL_ALLOWED_VERBS = frozenset({
-    "get", "describe", "logs", "top", "rollout",
-    "api-resources", "api-versions", "explain", "cluster-info",
-    "config", "version", "wait", "auth",
-})
-
-_KUBECTL_BLOCKED_VERBS = frozenset({
-    "exec", "delete", "apply", "patch", "create", "edit", "replace",
-    "cp", "run", "attach", "port-forward", "proxy", "taint", "drain",
-    "cordon", "uncordon", "label", "annotate", "scale", "set", "expose",
-})
-
-
 async def run_kubectl(
     cluster_name: str,
     command: list[str],
     gateway_id: str | None = None,
+    confirmed: bool = False,
 ) -> dict:
     """
     Execute a kubectl command on a cluster.
@@ -225,14 +209,17 @@ async def run_kubectl(
     scale_deployment to scale pods, deploy_model for model deployments, and
     helm_upgrade or helm_uninstall for Helm operations.
 
-    Allowed verbs: get, describe, logs, top, rollout (status, history),
-    api-resources, api-versions, explain, cluster-info, config (view), version, wait, auth (can-i).
+    Reads always pass: get, describe, logs, top, rollout (status, history),
+    api-resources, api-versions, explain, cluster-info, config (view), version,
+    wait, auth (can-i).
 
-    Blocked verbs: exec, delete, apply, patch, create, edit, replace, cp, run,
-    attach, port-forward, proxy, taint, drain, cordon, uncordon, label, annotate,
-    scale, set, expose — and the connector refuses them again, whatever the caller.
-
-    Write operations executed via this tool are recorded in the audit log.
+    Writes (delete, apply, patch, scale, label, cordon, drain, exec, …) pass
+    only when the organisation's tool policy allows them (allow_writes on
+    run_kubectl / kubectl_exec in the console's Tool Policy). The policy engine
+    then asks for confirmed=True, records the write in the audit log, and runs
+    it WITHOUT verification — the catalogued action for the same change would
+    carry a proof. Otherwise the engine refuses the write by name, whatever the
+    caller.
 
     Args:
         cluster_name: Target cluster.
@@ -240,15 +227,18 @@ async def run_kubectl(
                  Example: ["get", "pods", "-n", "default"]
         gateway_id: Gateway UUID from list_clusters. Omit for single-gateway deployments;
                     provide to disambiguate when multiple gateways share a cluster name.
+        confirmed: Required for a write the organisation allows. Pass False (default)
+                   to receive the refusal or the confirmation request with its preview.
     """
     if not command:
         return {"error": "No kubectl command provided."}
-    verb = command[0]
-    if verb in _KUBECTL_BLOCKED_VERBS or verb not in _KUBECTL_ALLOWED_VERBS:
-        return {"error": f"kubectl verb '{verb}' is not allowed via MCP. Use dedicated VibOps tools for destructive operations."}
+    # No verb list here since 25/10/2026: the policy engine decides from the
+    # organisation's tool policy, and a list kept on this side would refuse
+    # what the organisation allowed — a bound enforced where nothing runs.
     return await _run_job_sync("kubectl_exec", {
         "cluster": cluster_name,
         "command": command,
+        "confirmed": confirmed,
     }, gateway_id=gateway_id)
 
 
