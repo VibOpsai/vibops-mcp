@@ -196,8 +196,12 @@ async def helm_uninstall(
     }, timeout=30, gateway_id=gateway_id)
 
 
+# Mirrors the connector's bound (`refuse_unless_read_only` in
+# vibops_connectors.kubectl.connector), which is the one that governs: this
+# list only spares a round trip. `label` and `annotate` left it on 25/10/2026 —
+# they write, and the connector refuses them.
 _KUBECTL_ALLOWED_VERBS = frozenset({
-    "get", "describe", "logs", "top", "rollout", "label", "annotate",
+    "get", "describe", "logs", "top", "rollout",
     "api-resources", "api-versions", "explain", "cluster-info",
     "config", "version", "wait", "auth",
 })
@@ -205,7 +209,7 @@ _KUBECTL_ALLOWED_VERBS = frozenset({
 _KUBECTL_BLOCKED_VERBS = frozenset({
     "exec", "delete", "apply", "patch", "create", "edit", "replace",
     "cp", "run", "attach", "port-forward", "proxy", "taint", "drain",
-    "cordon", "uncordon",
+    "cordon", "uncordon", "label", "annotate", "scale", "set", "expose",
 })
 
 
@@ -221,11 +225,12 @@ async def run_kubectl(
     scale_deployment to scale pods, deploy_model for model deployments, and
     helm_upgrade or helm_uninstall for Helm operations.
 
-    Allowed verbs: get, describe, logs, top, rollout, label, annotate,
-    api-resources, api-versions, explain, cluster-info, config, version, wait, auth.
+    Allowed verbs: get, describe, logs, top, rollout (status, history),
+    api-resources, api-versions, explain, cluster-info, config (view), version, wait, auth (can-i).
 
-    Blocked verbs: exec, delete, apply, patch, create, edit, replace,
-    cp, run, attach, port-forward, proxy, taint, drain, cordon, uncordon.
+    Blocked verbs: exec, delete, apply, patch, create, edit, replace, cp, run,
+    attach, port-forward, proxy, taint, drain, cordon, uncordon, label, annotate,
+    scale, set, expose — and the connector refuses them again, whatever the caller.
 
     Write operations executed via this tool are recorded in the audit log.
 
