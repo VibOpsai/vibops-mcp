@@ -214,12 +214,13 @@ async def run_kubectl(
     wait, auth (can-i).
 
     Writes (delete, apply, patch, scale, label, cordon, drain, exec, …) pass
-    only when the organisation's tool policy allows them (allow_writes on
-    run_kubectl / kubectl_exec in the console's Tool Policy). The policy engine
-    then asks for confirmed=True, records the write in the audit log, and runs
-    it WITHOUT verification — the catalogued action for the same change would
-    carry a proof. Otherwise the engine refuses the write by name, whatever the
-    caller.
+    unless the organisation's tool policy turned them off (allow_writes on
+    run_kubectl / kubectl_exec in the console's Tool Policy, open by default).
+    The policy engine asks for confirmed=True, records the write in the audit
+    log, and runs it WITHOUT verification — the catalogued action for the same
+    change would carry a proof, so prefer it when one exists. When the
+    organisation turned writes off, the engine refuses the write by name,
+    whatever the caller.
 
     Args:
         cluster_name: Target cluster.
@@ -227,8 +228,8 @@ async def run_kubectl(
                  Example: ["get", "pods", "-n", "default"]
         gateway_id: Gateway UUID from list_clusters. Omit for single-gateway deployments;
                     provide to disambiguate when multiple gateways share a cluster name.
-        confirmed: Required for a write the organisation allows. Pass False (default)
-                   to receive the refusal or the confirmation request with its preview.
+        confirmed: Required for a write. Pass False (default) to receive the
+                   confirmation request with its preview, or the refusal.
     """
     if not command:
         return {"error": "No kubectl command provided."}
