@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "vibops-mcp"
-version = "0.59.0"
+version = "0.60.0"
 description = "VibOps MCP server — control your GPU infrastructure from any MCP-compatible client"
 readme = "README.md"
 license = { text = "MIT" }
