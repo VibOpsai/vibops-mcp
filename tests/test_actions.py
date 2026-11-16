@@ -516,3 +516,28 @@ async def test_registry_delete_tag_forwards_gateway_id():
         )
     body = mock_post.call_args[1]["body"] if mock_post.call_args[1] else mock_post.call_args[0][1]
     assert body["gateway_id"] == "gw-onprem-1"
+
+
+@pytest.mark.asyncio
+async def test_xo_v2v_migrate_is_a_dry_run_by_default():
+    """U-M7 (16/11/2026): confirmed was hard-coded True; it defaults to a preview now."""
+    with patch("vibops_mcp.tools.actions.client.post", new_callable=AsyncMock) as mock_post, \
+         patch("vibops_mcp.tools.actions.client.get", new_callable=AsyncMock) as mock_get, \
+         patch("asyncio.sleep", new_callable=AsyncMock):
+        mock_post.return_value = JOB_PENDING
+        mock_get.return_value = JOB_SUCCESS
+        await actions.xo_v2v_migrate(esxi_id="esxi-1", vm_name="db-01")
+    body = mock_post.call_args[1]["body"] if mock_post.call_args[1] else mock_post.call_args[0][1]
+    assert body["payload"]["confirmed"] is False
+
+
+@pytest.mark.asyncio
+async def test_xo_v2v_migrate_confirmed_proceeds():
+    with patch("vibops_mcp.tools.actions.client.post", new_callable=AsyncMock) as mock_post, \
+         patch("vibops_mcp.tools.actions.client.get", new_callable=AsyncMock) as mock_get, \
+         patch("asyncio.sleep", new_callable=AsyncMock):
+        mock_post.return_value = JOB_PENDING
+        mock_get.return_value = JOB_SUCCESS
+        await actions.xo_v2v_migrate(esxi_id="esxi-1", vm_name="db-01", confirmed=True)
+    body = mock_post.call_args[1]["body"] if mock_post.call_args[1] else mock_post.call_args[0][1]
+    assert body["payload"]["confirmed"] is True

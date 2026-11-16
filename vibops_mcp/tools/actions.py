@@ -765,6 +765,7 @@ async def xo_v2v_migrate(
     vm_name: str,
     target_sr: str | None = None,
     target_network: str | None = None,
+    confirmed: bool = False,
     gateway_id: str | None = None,
 ) -> dict:
     """
@@ -781,9 +782,13 @@ async def xo_v2v_migrate(
         vm_name: Name of the VM to migrate on ESXi.
         target_sr: Target storage repository UUID on XCP-ng (optional).
         target_network: Target network UUID on XCP-ng (optional).
+        confirmed: Must be True to proceed. Pass False (default) for a dry-run preview.
         gateway_id: Target gateway (optional).
     """
-    payload: dict = {"esxi_id": esxi_id, "vm_name": vm_name, "confirmed": True}
+    # `confirmed` was hard-coded True until 16/11/2026 (audit U-M7): a warm
+    # migration ran from Claude Desktop with no dry run, unlike every other
+    # destructive MCP tool. It is a parameter now, defaulting to a preview.
+    payload: dict = {"esxi_id": esxi_id, "vm_name": vm_name, "confirmed": confirmed}
     if target_sr:
         payload["target_sr"] = target_sr
     if target_network:
